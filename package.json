@@ -1,0 +1,28 @@
+{
+  "name": "supercrawler",
+  "description": "A web crawler",
+  "version": "0.1.0",
+  "homepage": "https://github.com/brendonboshell/supercrawler",
+  "author": "Brendon Boshell <brendonboshell@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brendonboshell/supercrawler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brendonboshell/supercrawler/issues"
+  },
+  "keywords": [
+    "crawler",
+    "spider",
+    "supercrawler"
+  ],
+  "scripts": {
+    "test": "mocha"
+  },
+  "main": "./lib/index.js",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  }
+}
