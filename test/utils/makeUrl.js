@@ -8,6 +8,10 @@ module.exports = function (url, statusCode) {
     return this.url;
   };
 
+  Url.prototype.getUrl = function () {
+    return this.url;
+  };
+
   Url.prototype.getStatusCode = function () {
     return this.statusCode;
   };

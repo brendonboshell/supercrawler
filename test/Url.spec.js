@@ -18,7 +18,7 @@ describe("Url", function () {
     expect(new Url("https://example.com").getUniqueId()).to.equal("https://example.com");
   });
 
-  describe("statusCode", function () {
+  describe("#getStatusCode", function () {
     it("returns the statusCode if specified", function () {
       expect(new Url({
         url: "https://example.com",
@@ -30,6 +30,14 @@ describe("Url", function () {
       expect(new Url({
         url: "https://example.com"
       }).getStatusCode()).to.equal(null);
+    });
+  });
+
+  describe("#getUrl", function () {
+    it("returns the URL", function () {
+      expect(new Url({
+        url: "https://example.com"
+      }).getUrl()).to.equal("https://example.com");
     });
   });
 });
