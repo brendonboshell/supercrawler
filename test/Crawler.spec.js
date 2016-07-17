@@ -32,19 +32,28 @@ describe("Crawler", function () {
   var Crawler,
       requestSpy,
       insertSpy,
+      pageContentType,
       pageStatusCode,
       pageBody,
-      robotsStatusCode =
+      robotsStatusCode;
 
   beforeEach(function () {
+    pageContentType = "text/html";
     pageStatusCode = 200;
-    pageBody = "test";
+    pageBody = "<html><body>test</body></html>";
     robotsStatusCode = 200;
 
     requestSpy = sinon.spy(function (opts, cb) {
       if (opts.url.indexOf("robots") === -1) {
         setTimeout(function () {
+          var headers = {};
+
+          if (pageContentType) {
+            headers["content-type"] = pageContentType;
+          }
+
           cb(null, {
+            headers: headers,
             statusCode: pageStatusCode,
             body: pageBody
           });
@@ -52,6 +61,9 @@ describe("Crawler", function () {
       } else {
         setTimeout(function () {
           cb(null, {
+            headers: {
+              "content-type": "text/plain"
+            },
             statusCode: robotsStatusCode,
             body: ["User-agent: *",
               "Allow: /",
@@ -338,6 +350,164 @@ describe("Crawler", function () {
         }));
         done();
       }, 200);
+    });
+  });
+
+  describe("#addHandler", function () {
+    var handler,
+        handlerRet;
+
+    beforeEach(function () {
+      handlerRet = [];
+      handler = sinon.spy(function () {
+        return handlerRet;
+      });
+    });
+
+    it("can listen to all content types", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.addHandler(handler);
+      crawler.start();
+      pageContentType = "text/plain";
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(handler,
+          sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html");
+        done();
+      }, 15);
+    });
+
+    it("fires for matching content types", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      pageContentType = "text/html";
+      crawler.addHandler("text/html", handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(handler,
+          sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html");
+        done();
+      }, 15);
+    });
+
+    it("does not fire for non-matching content types", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      pageContentType = "text/plain";
+      crawler.addHandler("text/html", handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html")).to.equal(false);
+        done();
+      }, 15);
+    });
+
+    it("fires for a wide-matching content type", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      pageContentType = "text/plain";
+      crawler.addHandler("text", handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html")).to.equal(true);
+        done();
+      }, 15);
+    });
+
+    it("can fire when content type determined from extension", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      pageContentType = "";
+      crawler.addHandler("text/html", handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html")).to.equal(true);
+        done();
+      }, 15);
+    });
+
+    it("can hold fire when content type determined from extension", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      pageContentType = "";
+      crawler.addHandler("text/plain", handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+          "https://example.com/index1.html")).to.equal(false);
+        done();
+      }, 15);
+    });
+
+    it("adds URL to the queue", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      handlerRet = [
+        "https://example.com/page98.html",
+        "https://example.com/page99.html"
+      ];
+      crawler.addHandler(handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertSpy, sinon.match({
+          _url: "https://example.com/page99.html"
+        }));
+        sinon.assert.calledWith(insertSpy, sinon.match({
+          _url: "https://example.com/page98.html"
+        }));
+        done();
+      }, 15);
+    });
+
+    it("works if handler returns invalid value", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      handlerRet = true;
+      crawler.addHandler(handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(insertSpy.calledWith(sinon.match({
+          _url: true
+        }))).to.equal(false);
+        done();
+      }, 15);
     });
   });
 });
