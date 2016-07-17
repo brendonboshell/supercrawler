@@ -5,30 +5,33 @@ var proxyquire = require('proxyquire'),
     Promise = require("bluebird"),
     FifoUrlListMock;
 
+// Note: I cannot get sinon's useFakeTimers to behave with Bluebird's
+// promises. The calls to .finally(\Function) seem to only be called at the
+// last minute. Instead, the tests are using actual timing, which is not ideal.
+
 FifoUrlListMock = function () {
   this.callCount = 0;
   this.delayTime = 1;
 };
 
 FifoUrlListMock.prototype.getNextUrl = function () {
+  var self = this;
+
   this.callCount++;
 
   if (this.callCount >= 20) {
     return Promise.reject(new RangeError("rangeerror"));
   }
 
-  // We are forcing a delay here, because there is a problem using Promises
-  // with sinon fake timers. Probably because Promise.resolve is not using a
-  // setTimeout anywhere. I think it is related to this issue:
-  // https://github.com/sinonjs/sinon/issues/738
   return Promise.delay(this.delayTime).then(function () {
-    return makeUrl("https://example.com/index" + this.callCount + ".html");
+    return makeUrl("https://example.com/index" + self.callCount + ".html");
   });
 };
 
 describe("Crawler", function () {
   var Crawler,
-      requestSpy;
+      requestSpy,
+      insertSpy;
 
   beforeEach(function () {
     requestSpy = sinon.spy(function (opts, cb) {
@@ -42,14 +45,20 @@ describe("Crawler", function () {
       }, 1);
     });
 
+    insertSpy = sinon.spy(function () {
+      return Promise.resolve();
+    });
+
+    FifoUrlListMock.prototype.insert = insertSpy;
+
     Crawler = proxyquire("../lib/Crawler", {
       "./FifoUrlList": FifoUrlListMock,
       "request": requestSpy
     });
   });
 
-  var numRobotsCalls = function () {
-    var numRobotsCalls = 0;
+  var numCrawlsOfUrl = function (url) {
+    var numCalls = 0;
     var n = 0;
     var call;
 
@@ -57,16 +66,20 @@ describe("Crawler", function () {
       call = requestSpy.getCall(n);
 
       if (call.calledWith(sinon.match({
-        url: "https://example.com/robots.txt",
+        url: url,
         forever: true
       }))) {
-        numRobotsCalls++;
+        numCalls++;
       }
 
       n++;
     }
 
-    return numRobotsCalls;
+    return numCalls;
+  };
+
+  var numRobotsCalls = function () {
+    return numCrawlsOfUrl("https://example.com/robots.txt");
   };
 
   it("returns an instance when called as a function", function () {
@@ -114,17 +127,22 @@ describe("Crawler", function () {
     });
   });
 
+  describe("#getUserAgent", function () {
+    it("uses a default user agent", function () {
+      expect(new Crawler().getUserAgent()).to.equal("Mozilla/5.0 " +
+        "(compatible; supercrawler/1.0; " +
+        "+https://github.com/brendonboshell/supercrawler)");
+    });
+
+    it("will use a specified user agent", function () {
+      expect(new Crawler({
+        userAgent: "mybot/1.1"
+      }).getUserAgent()).to.equal("mybot/1.1");
+    });
+  });
+
   describe("#start", function () {
-    var clock;
 
-    before(function () {
-      clock = sinon.useFakeTimers();
-    });
-
-    after(function () {
-      clock.restore();
-    });
-    
     it("returns false if crawl is already running", function () {
       var crawler;
 
@@ -132,6 +150,7 @@ describe("Crawler", function () {
       crawler.start();
 
       expect(crawler.start()).to.equal(false);
+      crawler.stop();
     });
 
     it("returns true if crawl is not already started", function () {
@@ -140,68 +159,119 @@ describe("Crawler", function () {
       crawler = new Crawler();
 
       expect(crawler.start()).to.equal(true);
+      crawler.stop();
     });
 
     it("throttles requests according to the interval", function (done) {
       var crawler = new Crawler({
-        interval: 100
+        interval: 50
       });
       var fifoUrlList = crawler.getUrlList();
 
       crawler.start();
-      clock.tick(250);
 
-      // call at 0ms, 100ms, 200ms
-      expect(fifoUrlList.callCount).to.equal(3);
-      done();
+      // call at 0ms, 50ms, 100ms
+      setTimeout(function () {
+        crawler.stop();
+        expect(fifoUrlList.callCount).to.equal(3);
+        done();
+      }, 130);
     });
 
     it("obeys the concurrency limit", function (done) {
       var crawler = new Crawler({
-        interval: 10,
+        interval: 50,
         concurrentRequestsLimit: 1
       });
       var fifoUrlList = crawler.getUrlList();
 
-      // simulate each request taking 15ms
-      fifoUrlList.delayTime = 15;
+      // simulate each request taking 75ms
+      fifoUrlList.delayTime = 75;
 
       crawler.start();
-      clock.tick(58);
 
-      // call at 0ms finished at 15ms
-      // call at 15ms finishes at 30ms
-      // call at 30ms finishes at 45ms
-      // call at 45ms finsihes at 60ms
-      expect(fifoUrlList.callCount).to.equal(4);
-      done();
+      // call at 0ms finished at 75ms
+      // call at 75ms finishes at 150ms
+      // call at 150ms finishes at 225ms
+      // call at 225ms finsihes at 300ms
+      setTimeout(function () {
+        crawler.stop();
+        expect(fifoUrlList.callCount).to.equal(4);
+        done();
+      }, 280);
     });
 
-    it("caches robots.txt for a default of 60 minutes", function (done) {
+    it("caches robots.txt for a default of 60 minutes", function () {
       var crawler = new Crawler({
         interval: 1000 * 60 * 5, // get page every 5 minutes
         concurrentRequestsLimit: 1
       });
 
-      crawler.start();
-      clock.tick(1000 * 60 * 80); // run for 80 minutes
-
-      expect(numRobotsCalls()).to.equal(2);
-      done();
+      // There's no easy way to test this without use sinon fakeTimers (see
+      // top of this file.)
+      expect(crawler._robotsCache.options.stdTTL).to.equal(3600);
     });
 
     it("caches robots.txt for a specified amount of time", function (done) {
       var crawler = new Crawler({
-        interval: 1000 * 60 * 5, // get page every 5 minutes
+        interval: 50, // 50 ms
         concurrentRequestsLimit: 1,
-        robotsCacheTime: 1000 * 60 * 30 // 30 minutes
+        robotsCacheTime: 100 // 100ms
       });
 
       crawler.start();
-      clock.tick(1000 * 60 * 80); // run for 80 minutes
 
-      expect(numRobotsCalls()).to.equal(3);
-      done();
+      // get robots at 0ms, 100ms, 200ms
+      setTimeout(function () {
+        crawler.stop();
+        expect(numRobotsCalls()).to.equal(3);
+        done();
+      }, 280);
+    });
+
+    it("requests a page that is not excluded by robots.txt", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index18.html")).to.equal(1);
+        done();
+      }, 200);
+    });
+
+    it("skips a page that is excluded by robots.txt", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index17.html")).to.equal(0);
+        done();
+      }, 200);
+    });
+
+    it("updates the error code to ROBOTS_NOT_ALLOWED", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertSpy, sinon.match({
+          _url: "https://example.com/index17.html",
+          _errorCode: "ROBOTS_NOT_ALLOWED"
+        }));
+        done();
+      }, 200);
     });
   });
 });

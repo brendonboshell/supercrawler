@@ -40,4 +40,13 @@ describe("Url", function () {
       }).getUrl()).to.equal("https://example.com");
     });
   });
+
+  describe("#getErrorCode", function () {
+    it("returns the error code", function () {
+      expect(new Url({
+        url: "https://example.com",
+        errorCode: "ROBOTS_NOT_ALLOWED"
+      }).getErrorCode()).to.equal("ROBOTS_NOT_ALLOWED");
+    });
+  });
 });
