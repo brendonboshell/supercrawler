@@ -18,8 +18,8 @@
     "supercrawler"
   ],
   "scripts": {
-    "test": "mocha",
-    "coverage": "istanbul cover _mocha -- -R spec"
+    "test": "mocha --recursive",
+    "coverage": "istanbul cover _mocha -- -R spec --recursive"
   },
   "main": "./lib/index.js",
   "devDependencies": {
@@ -31,6 +31,8 @@
   },
   "dependencies": {
     "bluebird": "^3.4.1",
+    "cheerio": "^0.20.0",
+    "mime-types": "^2.1.11",
     "node-cache": "^3.2.1",
     "request": "^2.73.0",
     "robots-parser": "^1.0.0"
