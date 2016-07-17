@@ -26,5 +26,8 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.4",
     "mocha": "^2.5.3"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.1"
   }
 }
