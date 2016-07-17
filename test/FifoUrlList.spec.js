@@ -1,26 +1,6 @@
 var FifoUrlList = require("../lib/FifoUrlList"),
     expect = require("chai").expect,
-    makeUrl;
-
-makeUrl = function (url, statusCode) {
-  function Url(opts) {
-    this.url = opts.url;
-    this.statusCode = opts.statusCode;
-  }
-
-  Url.prototype.getUniqueId = function () {
-    return this.url;
-  };
-
-  Url.prototype.getStatusCode = function () {
-    return this.statusCode;
-  };
-
-  return new Url({
-    url: url,
-    statusCode: statusCode || null
-  });
-};
+    makeUrl = require("./utils/makeUrl");
 
 describe("FifoUrlList", function () {
   it("returns an instance when called as a function", function () {

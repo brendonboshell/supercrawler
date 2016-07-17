@@ -26,7 +26,8 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.4",
     "mocha": "^2.5.3",
-    "proxyquire": "^1.7.10"
+    "proxyquire": "^1.7.10",
+    "sinon": "^1.17.4"
   },
   "dependencies": {
     "bluebird": "^3.4.1"
