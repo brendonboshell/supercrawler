@@ -45,7 +45,7 @@ Each `Crawler` instance represents a web crawler. You can configure your
 crawler with the following options:
 
 | Option | Description |
-| -- | -- |
+| --- | --- |
 | urlList | Custom instance of `UrlList` type queue. Defaults to `FifoUrlList`, which processes URLs in the order that they were added to the queue; once they are removed from the queue, they cannot be recrawled. |
 | interval | Number of milliseconds between requests. Defaults to 1000. |
 | concurrentRequestsLimit | Maximum number of concurrent requests. Defaults to 5. |
@@ -62,7 +62,7 @@ Example usage:
 The following methods are available:
 
 | Method | Description |
-| -- | -- |
+| --- | --- |
 | getUrlList | Get the `UrlList` type instance. |
 | getInterval | Get the interval setting. |
 | getConcurrentRequestsLimit | Get the maximum number of concurrent requests. |
@@ -83,7 +83,7 @@ fails.
 The following methods are available:
 
 | Method | Description |
-| -- | -- |
+| --- | --- |
 | insert(url) | Insert a `Url` object. |
 | getNextUrl() | Get the next `Url` to be crawled. |
 
@@ -95,7 +95,7 @@ crawled. It is uniquely identified by an absolute-path URL, but also contains
 information about errors and status codes.
 
 | Option | Description |
-| -- | -- |
+| --- | --- |
 | url | Absolute-path string url |
 | statusCode | HTTP status code or `null`. |
 | errorCode | String error code or `null`. |
@@ -113,7 +113,7 @@ You can also call it just a string URL:
 The following methods are available:
 
 | Method | Description |
-| -- | -- |
+| --- | --- |
 | getUniqueId | Get the unique identifier for this object. |
 | getUrl | Get the absolute-path string URL. |
 | getErrorCode | Get the error code, or `null` if it is empty. |
@@ -125,7 +125,7 @@ A function that returns a handler which parses a HTML page and identifies any
 links.
 
 | Option | Description |
-| -- | -- |
+| --- | --- |
 | hostnames | Array of hostnames that are allowed to be crawled. |
 
 Example usage:
