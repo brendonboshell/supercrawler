@@ -3,7 +3,6 @@ var proxyquire = require('proxyquire'),
     expect = require("chai").expect,
     makeUrl = require("./utils/makeUrl"),
     Promise = require("bluebird"),
-    Crawler,
     FifoUrlListMock;
 
 FifoUrlListMock = function () {
@@ -14,20 +13,62 @@ FifoUrlListMock = function () {
 FifoUrlListMock.prototype.getNextUrl = function () {
   this.callCount++;
 
+  if (this.callCount >= 20) {
+    return Promise.reject(new RangeError("rangeerror"));
+  }
+
   // We are forcing a delay here, because there is a problem using Promises
   // with sinon fake timers. Probably because Promise.resolve is not using a
   // setTimeout anywhere. I think it is related to this issue:
   // https://github.com/sinonjs/sinon/issues/738
   return Promise.delay(this.delayTime).then(function () {
-    return makeUrl("https://example.com/index.html");
+    return makeUrl("https://example.com/index" + this.callCount + ".html");
   });
 };
 
-Crawler = proxyquire("../lib/Crawler", {
-  "./FifoUrlList": FifoUrlListMock
-});
-
 describe("Crawler", function () {
+  var Crawler,
+      requestSpy;
+
+  beforeEach(function () {
+    requestSpy = sinon.spy(function (opts, cb) {
+      setTimeout(function () {
+        cb(null, {
+          body: ["User-agent: *",
+            "Allow: /",
+            "Disallow: /index17.html"
+          ].join("\n")
+        });
+      }, 1);
+    });
+
+    Crawler = proxyquire("../lib/Crawler", {
+      "./FifoUrlList": FifoUrlListMock,
+      "request": requestSpy
+    });
+  });
+
+  var numRobotsCalls = function () {
+    var numRobotsCalls = 0;
+    var n = 0;
+    var call;
+
+    while (requestSpy.getCall(n)) {
+      call = requestSpy.getCall(n);
+
+      if (call.calledWith(sinon.match({
+        url: "https://example.com/robots.txt",
+        forever: true
+      }))) {
+        numRobotsCalls++;
+      }
+
+      n++;
+    }
+
+    return numRobotsCalls;
+  };
+
   it("returns an instance when called as a function", function () {
     expect(Crawler()).to.be.an.instanceOf(Crawler);
   });
@@ -83,7 +124,7 @@ describe("Crawler", function () {
     after(function () {
       clock.restore();
     });
-
+    
     it("returns false if crawl is already running", function () {
       var crawler;
 
@@ -133,6 +174,33 @@ describe("Crawler", function () {
       // call at 30ms finishes at 45ms
       // call at 45ms finsihes at 60ms
       expect(fifoUrlList.callCount).to.equal(4);
+      done();
+    });
+
+    it("caches robots.txt for a default of 60 minutes", function (done) {
+      var crawler = new Crawler({
+        interval: 1000 * 60 * 5, // get page every 5 minutes
+        concurrentRequestsLimit: 1
+      });
+
+      crawler.start();
+      clock.tick(1000 * 60 * 80); // run for 80 minutes
+
+      expect(numRobotsCalls()).to.equal(2);
+      done();
+    });
+
+    it("caches robots.txt for a specified amount of time", function (done) {
+      var crawler = new Crawler({
+        interval: 1000 * 60 * 5, // get page every 5 minutes
+        concurrentRequestsLimit: 1,
+        robotsCacheTime: 1000 * 60 * 30 // 30 minutes
+      });
+
+      crawler.start();
+      clock.tick(1000 * 60 * 80); // run for 80 minutes
+
+      expect(numRobotsCalls()).to.equal(3);
       done();
     });
   });
