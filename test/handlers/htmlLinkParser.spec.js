@@ -75,4 +75,24 @@ describe("HtmlLikParser", function () {
 
     expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([]);
   });
+
+  it("can restrict to specific hosts", function () {
+    var hlp = htmlLinkParser({
+          hostnames: ["example.com"]
+        }),
+        html;
+
+    html = makeHtmlWithLinks([
+      "/page2.html",
+      "page3.html",
+      "https://example.com/101?q=str",
+      "https://example2.com/55"
+    ]);
+
+    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([
+      "https://example.com/page2.html",
+      "https://example.com/my/page3.html",
+      "https://example.com/101?q=str"
+    ]);
+  });
 });
