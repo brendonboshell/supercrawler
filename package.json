@@ -18,11 +18,13 @@
     "supercrawler"
   ],
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "istanbul cover _mocha -- -R spec"
   },
   "main": "./lib/index.js",
   "devDependencies": {
     "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
     "mocha": "^2.5.3"
   }
 }
