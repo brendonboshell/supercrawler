@@ -31,18 +31,35 @@ FifoUrlListMock.prototype.getNextUrl = function () {
 describe("Crawler", function () {
   var Crawler,
       requestSpy,
-      insertSpy;
+      insertSpy,
+      pageStatusCode,
+      pageBody,
+      robotsStatusCode =
 
   beforeEach(function () {
+    pageStatusCode = 200;
+    pageBody = "test";
+    robotsStatusCode = 200;
+
     requestSpy = sinon.spy(function (opts, cb) {
-      setTimeout(function () {
-        cb(null, {
-          body: ["User-agent: *",
-            "Allow: /",
-            "Disallow: /index17.html"
-          ].join("\n")
-        });
-      }, 1);
+      if (opts.url.indexOf("robots") === -1) {
+        setTimeout(function () {
+          cb(null, {
+            statusCode: pageStatusCode,
+            body: pageBody
+          });
+        }, 1);
+      } else {
+        setTimeout(function () {
+          cb(null, {
+            statusCode: robotsStatusCode,
+            body: ["User-agent: *",
+              "Allow: /",
+              "Disallow: /index17.html"
+            ].join("\n")
+          });
+        }, 1);
+      }
     });
 
     insertSpy = sinon.spy(function () {
@@ -257,6 +274,36 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("crawls all pages if robots.txt is 404", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+      robotsStatusCode = 404;
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index17.html")).to.equal(1);
+        done();
+      }, 200);
+    });
+
+    it("excludes all pages if robots.txt could not be crawled", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+      robotsStatusCode = 600;
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index5.html")).to.equal(0);
+        done();
+      }, 200);
+    });
+
     it("updates the error code to ROBOTS_NOT_ALLOWED", function (done) {
       var crawler = new Crawler({
         interval: 10
@@ -269,6 +316,25 @@ describe("Crawler", function () {
         sinon.assert.calledWith(insertSpy, sinon.match({
           _url: "https://example.com/index17.html",
           _errorCode: "ROBOTS_NOT_ALLOWED"
+        }));
+        done();
+      }, 200);
+    });
+
+    it("updates the error code for a 404", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+      pageStatusCode = 404;
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertSpy, sinon.match({
+          _url: "https://example.com/index1.html",
+          _errorCode: "HTTP_ERROR",
+          _statusCode: 404
         }));
         done();
       }, 200);
