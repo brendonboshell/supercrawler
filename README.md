@@ -1,10 +1,15 @@
-# Supercrawler - Node.js Web Crawler
+# Node.js Web Crawler
+
+[![npm](https://img.shields.io/npm/v/supercrawler.svg?maxAge=2592000)]()
+[![npm](https://img.shields.io/npm/l/supercrawler.svg?maxAge=2592000)]()
+[![GitHub issues](https://img.shields.io/github/issues/brendonboshell/supercrawler.svg?maxAge=2592000)]()
+[![David](https://img.shields.io/david/brendonboshell/supercrawler.svg?maxAge=2592000)]()
+[![David](https://img.shields.io/david/dev/brendonboshell/supercrawler.svg?maxAge=2592000)]()
+[![Travis](https://img.shields.io/travis/brendonboshell/supercrawler.svg?maxAge=2592000)]()
 
 Supercrawler is a Node.js web crawler. It is designed to be highly configurable and easy to use.
 
-Supercrawler can store state information in a database, so you an can start and stop crawls easily. It will automatically retry failed URLs in an exponential backoff style (starting at 1 hour and doubling thereafter).
-
-When Supercrawler successfully crawls a page (which could be a image, text, etc), it will fire your custom content-type handlers. Define your own custom handlers to parse pages, save data and do anything else you need.
+When Supercrawler successfully crawls a page (which could be an image, a text document or any other file), it will fire your custom content-type handlers. Define your own custom handlers to parse pages, save data and do anything else you need.
 
 ## Features
 
@@ -18,43 +23,97 @@ When Supercrawler successfully crawls a page (which could be a image, text, etc)
   at any one time.
 * **Rate limiting**. Supercrawler will add a delay between requests to avoid
   bombarding servers.
+* **Exponential Backoff Retry**. Supercrawler will retry failed requests after 1 hour, then 2 hours, then 4 hours, etc. To use this feature, you must use the database-backed crawl queue.
 
-## Step 1. Create a New Crawler
+## How It Works
 
-    var crawler = new supercrawler.Crawler({
-      interval: 100
-    });
+**Crawling** is controlled by the an instance of the `Crawler` object, which acts like a web client. It is responsible for coordinating with the *priority queue*, sending requests according to the concurrency and rate limits, checking the robots.txt rules and despatching content to the custom *content handlers* to be processed. Once started, it will automatically crawl pages until you ask it to stop.
 
-## Step 2. Add Content handlers
+The **Priority Queue** or **UrlList** keeps track of which URLs need to be crawled, and the order in which they are to be crawled. The Crawler will pass new URLs discovered by the content handlers to the priority queue. When the crawler is ready to crawl the next page, it will call the `getNextUrl` method. This method will work out which URL should be crawled next, based on implementation-specific rules. Any retry logic is handled by the queue.
 
-You can specify your own content handlers for all types of content or groups
-of content. You can target `text` or `text/html` documents easily.
+The **Content Handlers** are functions which take content buffers and do some further processing with them. You will almost certainly want to create your own content handlers to analyze pages or store data, for example. The content handlers tell the Crawler about new URLs that should be crawled in the future. Supercrawler provides content handlers to parse links from HTML pages, analyze robots.txt files for `Sitemap:` directives and parse sitemap files for URLs.
 
-The `htmlLinkParser` handler is included with Supercrawler. It automatically
-parses a HTML document, discovers links and adds them to the crawl queue. You
-can specify an array of allowed hostnames with the `hostnames` option, allowing
-you to easily control the scope of your crawl.
+## Get Started
 
-You can also specify your own handlers. Use these handlers to parse content,
-save files or identify links. Just return an array of links (absolute paths)
-from your handler, and Supercrawler will add them to the queue.
+First, install Supercrawler.
 
-    crawler.addHandler("text/html", supercrawler.handlers.htmlLinkParser({
-      hostnames: ["example.com"]
-    }));
-    crawler.addHandler("text/html", function (buf, url) {
-      console.log("Got page", url);
-    });
+```
+npm install supercrawler --save
+```
 
-## Step 3. Start the Crawl
+Second, create an instance of `Crawler`.
 
-Insert a starting URL into the queue, and call `crawler.start()`.
+```js
+var supercrawler = require("supercrawler");
 
-    crawler.getUrlList()
-      .insertIfNotExists(new supercrawler.Url("https://example.com/"))
-      .then(function () {
-        return crawler.start();
-      });
+// 1. Create a new instance of the Crawler
+// object, providing configuration details.
+// Note that configuration cannot be changed
+// after the object is created.
+var crawler = new supercrawler.Crawler({
+  // By default, Supercrawler uses a simple
+  // FIFO queue, which doesn't support
+  // retries or memory of rawl state. For
+  // any non-trivial crawl, you should
+  // create a database. Provide your database
+  // config to the constructor of DbUrlList.
+  urlList: new supercrawler.DbUrlList({
+    db: {
+      database: "crawler",
+      username: "root",
+      password: secrets.db.password,
+      sequelizeOpts: {
+        dialect: "mysql",
+        host: "localhost"
+      }
+    }
+  }),
+  // Tme (ms) between requests
+  interval: 1000,
+  // Maximum number of requests at any
+  // one time.
+  concurrentRequestsLimit: 5,
+  // Time (ms) to cache the results
+  // of robots.txt queries.
+  robotsCacheTime: 3600000,
+  // Query string to use during the crawl.
+  userAgent: "Mozilla/5.0 (compatible; supercrawler/1.0; +https://github.com/brendonboshell/supercrawler)"
+});
+```
+
+Third, add some content handlers.
+
+```js
+// Get "Sitemaps:" directives from robots.txt
+crawler.addHandler(supercrawler.handlers.robotsParser());
+
+// Crawl sitemap files and extract their URLs.
+crawler.addHandler(supercrawler.handlers.sitemapsParser());
+
+// Pick up <a href> links from HTML documents
+crawler.addHandler("text/html", supercrawler.handlers.htmlLinkParser({
+  // Restrict discovered links to the following hostnames.
+  hostnames: ["example.com"]
+}));
+
+// Custom content handler for HTML pages.
+crawler.addHandler("text/html", function (buf, url) {
+  var sizeKb = Buffer.byteLength(buf) / 1024;
+  logger.info("Processed", url, "Size=", sizeKb, "KB");
+});
+```
+
+Fourth, add a URL to the queue and start the crawl.
+
+```js
+crawler.getUrlList()
+  .insertIfNotExists(new supercrawler.Url("http://example.com/"))
+  .then(function () {
+    return crawler.start();
+  });
+```
+
+That's it! Supercrawler will handle the crawling for you. You only have to define your custom behaviour in the content handlers.
 
 ## Crawler
 
@@ -208,7 +267,7 @@ Example usage:
     var rp = supercrawler.handlers.robotsParser();
     crawler.addHandler("text/plain", supercrawler.handlers.robotsParser());
 
-# handlers.sitemapsParser
+## handlers.sitemapsParser
 
 A function that returns a handler which parses an XML sitemaps file. It will
 pick up any URLs matching `sitemapindex > sitemap > loc, urlset > url > loc`.
