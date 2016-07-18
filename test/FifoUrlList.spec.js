@@ -13,7 +13,7 @@ describe("FifoUrlList", function () {
 
     fifoUrlList = new FifoUrlList();
     url = makeUrl("https://example.com");
-    fifoUrlList.insert(url).then(function () {
+    fifoUrlList.insertIfNotExists(url).then(function () {
       return fifoUrlList.getNextUrl();
     }).then(function (res) {
       expect(res).to.equal(url);
@@ -36,8 +36,8 @@ describe("FifoUrlList", function () {
     fifoUrlList = new FifoUrlList();
     url1 = makeUrl("https://example.com");
     url2 = makeUrl("https://example.com/privacy.html");
-    fifoUrlList.insert(url1).then(function () {
-      return fifoUrlList.insert(url2);
+    fifoUrlList.insertIfNotExists(url1).then(function () {
+      return fifoUrlList.insertIfNotExists(url2);
     }).then(function () {
       return fifoUrlList.getNextUrl();
     }).then(function (res) {
@@ -54,8 +54,8 @@ describe("FifoUrlList", function () {
     fifoUrlList = new FifoUrlList();
     url1 = makeUrl("https://example.com");
     url2 = makeUrl("https://example.com/privacy.html");
-    fifoUrlList.insert(url1).then(function () {
-      return fifoUrlList.insert(url2);
+    fifoUrlList.insertIfNotExists(url1).then(function () {
+      return fifoUrlList.insertIfNotExists(url2);
     }).then(function () {
       return fifoUrlList.getNextUrl();
     }).then(function () {
@@ -66,7 +66,7 @@ describe("FifoUrlList", function () {
     });
   });
 
-  it("updates the queue item if a duplicate", function (done) {
+  it("does not update when using insertIfNotExists", function (done) {
     var fifoUrlList,
         url1,
         url2;
@@ -74,13 +74,33 @@ describe("FifoUrlList", function () {
     fifoUrlList = new FifoUrlList();
     url1 = makeUrl("https://example.com", null);
     url2 = makeUrl("https://example.com", 200);
-    fifoUrlList.insert(url1).then(function () {
-      return fifoUrlList.insert(url2);
+    fifoUrlList.insertIfNotExists(url1).then(function () {
+      return fifoUrlList.insertIfNotExists(url2);
     }).then(function () {
       return fifoUrlList.getNextUrl();
     }).then(function (res) {
-      expect(res.getStatusCode()).to.equal(200);
+      expect(res.getStatusCode()).to.equal(null);
       done();
+    });
+  });
+
+  describe("upsert", function () {
+    it("updates if a duplicate", function (done) {
+      var fifoUrlList,
+          url1,
+          url2;
+
+      fifoUrlList = new FifoUrlList();
+      url1 = makeUrl("https://example.com", null);
+      url2 = makeUrl("https://example.com", 200);
+      fifoUrlList.upsert(url1).then(function () {
+        return fifoUrlList.upsert(url2);
+      }).then(function () {
+        return fifoUrlList.getNextUrl();
+      }).then(function (res) {
+        expect(res.getStatusCode()).to.equal(200);
+        done();
+      });
     });
   });
 });

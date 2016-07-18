@@ -2,16 +2,19 @@ var proxyquire = require('proxyquire'),
     expect = require("chai").expect,
     CrawlerMock,
     UrlMock,
+    DbUrlListMock,
     htmlLinkParserMock,
     index;
 
 CrawlerMock = function () {};
 UrlMock = function () {};
+DbUrlListMock = function () {};
 htmlLinkParserMock = function () {};
 
 index = proxyquire("../lib/index", {
   "./Crawler": CrawlerMock,
   "./Url": UrlMock,
+  "./DbUrlList": DbUrlListMock,
   "./handlers/htmlLinkParser": htmlLinkParserMock
 });
 
@@ -22,6 +25,10 @@ describe("index", function () {
 
   it("exposes Url", function () {
     expect(index.Url).to.equal(UrlMock);
+  });
+
+  it("exposes DbUrlList", function () {
+    expect(index.DbUrlList).to.equal(DbUrlListMock);
   });
 
   it("exposes htmlLinkParser", function () {

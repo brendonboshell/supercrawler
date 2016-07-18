@@ -31,7 +31,8 @@ FifoUrlListMock.prototype.getNextUrl = function () {
 describe("Crawler", function () {
   var Crawler,
       requestSpy,
-      insertSpy,
+      insertIfNotExistsSpy,
+      upsertSpy,
       pageContentType,
       pageStatusCode,
       pageBody,
@@ -52,6 +53,10 @@ describe("Crawler", function () {
             headers["content-type"] = pageContentType;
           }
 
+          if (pageStatusCode === 0) {
+            return cb(new Error("Some request error"));
+          }
+
           cb(null, {
             headers: headers,
             statusCode: pageStatusCode,
@@ -60,6 +65,10 @@ describe("Crawler", function () {
         }, 1);
       } else {
         setTimeout(function () {
+          if (robotsStatusCode === 0) {
+            return cb(new Error("Some request error"));
+          }
+
           cb(null, {
             headers: {
               "content-type": "text/plain"
@@ -74,11 +83,17 @@ describe("Crawler", function () {
       }
     });
 
-    insertSpy = sinon.spy(function () {
+    insertIfNotExistsSpy = sinon.spy(function () {
       return Promise.resolve();
     });
 
-    FifoUrlListMock.prototype.insert = insertSpy;
+    FifoUrlListMock.prototype.insertIfNotExists = insertIfNotExistsSpy;
+
+    upsertSpy = sinon.spy(function () {
+      return Promise.resolve();
+    });
+
+    FifoUrlListMock.prototype.upsert = upsertSpy;
 
     Crawler = proxyquire("../lib/Crawler", {
       "./FifoUrlList": FifoUrlListMock,
@@ -325,7 +340,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(insertSpy, sinon.match({
+        sinon.assert.calledWith(upsertSpy, sinon.match({
           _url: "https://example.com/index17.html",
           _errorCode: "ROBOTS_NOT_ALLOWED"
         }));
@@ -343,10 +358,28 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(insertSpy, sinon.match({
+        sinon.assert.calledWith(upsertSpy, sinon.match({
           _url: "https://example.com/index1.html",
           _errorCode: "HTTP_ERROR",
           _statusCode: 404
+        }));
+        done();
+      }, 200);
+    });
+
+    it("updates the error code for a request error", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+      pageStatusCode = 0;
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(upsertSpy, sinon.match({
+          _url: "https://example.com/index1.html",
+          _errorCode: "REQUEST_ERROR"
         }));
         done();
       }, 200);
@@ -482,10 +515,10 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(insertSpy, sinon.match({
+        sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
           _url: "https://example.com/page99.html"
         }));
-        sinon.assert.calledWith(insertSpy, sinon.match({
+        sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
           _url: "https://example.com/page98.html"
         }));
         done();
@@ -503,7 +536,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(insertSpy.calledWith(sinon.match({
+        expect(insertIfNotExistsSpy.calledWith(sinon.match({
           _url: true
         }))).to.equal(false);
         done();

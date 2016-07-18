@@ -16,6 +16,10 @@ module.exports = function (url, statusCode) {
     return this.statusCode;
   };
 
+  Url.prototype.getErrorCode = function () {
+    return null;
+  };
+
   return new Url({
     url: url,
     statusCode: statusCode || null
