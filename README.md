@@ -1,6 +1,10 @@
 # Supercrawler - Node.js Web Crawler
 
-Supercrawler is a Node.js web crawler.
+Supercrawler is a Node.js web crawler. It is designed to be highly configurable and easy to use.
+
+Supercrawler can store state information in a database, so you an can start and stop crawls easily. It will automatically retry failed URLs in an exponential backoff style (starting at 1 hour and doubling thereafter).
+
+When Supercrawler successfully crawls a page (which could be a image, text, etc), it will fire your custom content-type handlers. Define your own custom handlers to parse pages, save data and do anything else you need.
 
 ## Step 1. Create a New Crawler
 
@@ -34,7 +38,7 @@ from your handler, and Supercrawler will add them to the queue.
 Insert a starting URL into the queue, and call `crawler.start()`.
 
     crawler.getUrlList()
-      .insert(new supercrawler.Url("https://example.com/"))
+      .insertIfNotExists(new supercrawler.Url("https://example.com/"))
       .then(function () {
         return crawler.start();
       });
@@ -72,21 +76,60 @@ The following methods are available:
 | addHandler(handler) | Add a handler for all content types. |
 | addHandler(contentType, handler) | Add a handler for a specific content type. |
 
+
+## DbUrlList
+
+`DbUrlList` is a queue backed with a database, such as MySQL, Postgres or SQLite. You can use any database engine supported by Sequelize.
+
+If a request fails, this queue will ensure the request gets retried at some point in the future. The next request is schedule 1 hour into the future. After that, the period of delay doubles for each failure.
+
+Options:
+
+| Option | Description |
+| --- | --- |
+| opts.db.database | Database name. |
+| opts.db.username | Database username. |
+| opts.db.password | Database password. |
+| opts.db.sequelizeOpts | Options to pass to sequelize. |
+
+Example usage:
+
+    new supercrawler.DbUrlList({
+      db: {
+        database: "crawler",
+        username: "root",
+        password: "password",
+        sequelizeOpts: {
+          dialect: "mysql",
+          host: "localhost"
+        }
+      }
+    })
+
+The following methods are available:
+
+| Method | Description |
+| --- | --- |
+| insertIfNotExists(url) | Insert a `Url` object. |
+| upsert(url) | Upsert `Url` object. |
+| getNextUrl() | Get the next `Url` to be crawled. |
+
+
 ## FifoUrlList
 
 The `FifoUrlList` is the default URL queue powering the crawler. You can add
 URLs to the queue, and they will be crawled in the same order (FIFO).
 
 Note that, with this queue, URLs are only crawled once, even if the request
-fails.
+fails. If you need retry functionality, you must use `DbUrlList`.
 
 The following methods are available:
 
 | Method | Description |
 | --- | --- |
-| insert(url) | Insert a `Url` object. |
+| insertIfNotExists(url) | Insert a `Url` object. |
+| upsert(url) | Upsert `Url` object. |
 | getNextUrl() | Get the next `Url` to be crawled. |
-
 
 ## Url
 
