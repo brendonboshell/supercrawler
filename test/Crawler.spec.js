@@ -273,6 +273,22 @@ describe("Crawler", function () {
       }, 280);
     });
 
+    it("adds the robots.txt file itself to the crawl queue", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
+          _url: "https://example.com/robots.txt"
+        }));
+        done();
+      }, 200);
+    });
+
     it("requests a page that is not excluded by robots.txt", function (done) {
       var crawler = new Crawler({
         interval: 10

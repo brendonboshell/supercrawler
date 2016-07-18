@@ -6,6 +6,17 @@ Supercrawler can store state information in a database, so you an can start and 
 
 When Supercrawler successfully crawls a page (which could be a image, text, etc), it will fire your custom content-type handlers. Define your own custom handlers to parse pages, save data and do anything else you need.
 
+## Features
+
+* **Link Detection**. Supercrawler will parse crawled HTML documents, identify
+  links and add them to the queue.
+* **Robots Parsing**. Supercrawler will request robots.txt and check the rules
+  before crawling. It will also identify any sitemaps.
+* **Concurrency Limiting**. Supercrawler limits the number of requests sent out
+  at any one time.
+* **Rate limiting**. Supercrawler will add a delay between requests to avoid
+  bombarding servers.
+
 ## Step 1. Create a New Crawler
 
     var crawler = new supercrawler.Crawler({
@@ -177,14 +188,20 @@ Example usage:
       hostnames: ["example.com"]
     });
 
-## Features
 
-* Pluggable priority queues. Supercrawler ships with a simple first-in,
-  first-out style queue. But you can easily plug your own queue in, allowing
-  you to retry failed crawls, prioritize specific pages or save crawl data
-  in a database, for example.
-* Concurrency limiting. You can set a maximum number of requests that can
-  execute at the same time.
-* Rate limiting. You can set a rate limit to prevent crawling too quickly.
-* Robots adherence. Supercrawler automatically downloads, checks and caches
-  the results of robots.txt exclusions.
+## handlers.robotsParser
+
+A function that returns a handler which parses a robots.txt file. Robots.txt
+file are automatically crawled, and sent through the same content handler
+routines as any other file. This handler will look for any `Sitemap: ` directives,
+and add those XML sitemaps to the crawl.
+
+It will ignore any files that are not `/robots.txt`.
+
+If you want to extract the URLs from those XML sitemaps, you will also need
+to add a sitemap parser.
+
+Example usage:
+
+    var rp = supercrawler.handlers.robotsParser();
+    crawler.addHandler("text/plain", supercrawler.handlers.robotsParser());
