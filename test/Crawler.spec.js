@@ -36,13 +36,18 @@ describe("Crawler", function () {
       pageContentType,
       pageStatusCode,
       pageBody,
-      robotsStatusCode;
+      robotsStatusCode,
+      robotsTxt;
 
   beforeEach(function () {
     pageContentType = "text/html";
     pageStatusCode = 200;
     pageBody = "<html><body>test</body></html>";
     robotsStatusCode = 200;
+    robotsTxt = ["User-agent: *",
+      "Allow: /",
+      "Disallow: /index17.html"
+    ].join("\n");
 
     requestSpy = sinon.spy(function (opts, cb) {
       if (opts.url.indexOf("robots") === -1) {
@@ -60,7 +65,7 @@ describe("Crawler", function () {
           cb(null, {
             headers: headers,
             statusCode: pageStatusCode,
-            body: pageBody
+            body: new Buffer(pageBody)
           });
         }, 1);
       } else {
@@ -74,10 +79,7 @@ describe("Crawler", function () {
               "content-type": "text/plain"
             },
             statusCode: robotsStatusCode,
-            body: ["User-agent: *",
-              "Allow: /",
-              "Disallow: /index17.html"
-            ].join("\n")
+            body: new Buffer(robotsTxt)
           });
         }, 1);
       }
@@ -303,6 +305,24 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("skips page excluded by robots.txt, even if robots.txt not in cache", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      robotsTxt = ["User-agent: *",
+        "Allow: /",
+        "Disallow: /index1.html"
+      ].join("\n");
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index1.html")).to.equal(0);
+        done();
+      }, 200);
+    });
+
     it("skips a page that is excluded by robots.txt", function (done) {
       var crawler = new Crawler({
         interval: 10
@@ -425,7 +445,7 @@ describe("Crawler", function () {
       setTimeout(function () {
         crawler.stop();
         sinon.assert.calledWith(handler,
-          sinon.match("<html><body>test</body></html>"),
+          sinon.match(new Buffer("<html><body>test</body></html>")),
           "https://example.com/index1.html");
         done();
       }, 15);
@@ -443,7 +463,7 @@ describe("Crawler", function () {
       setTimeout(function () {
         crawler.stop();
         sinon.assert.calledWith(handler,
-          sinon.match("<html><body>test</body></html>"),
+          sinon.match(new Buffer("<html><body>test</body></html>")),
           "https://example.com/index1.html");
         done();
       }, 15);
@@ -477,7 +497,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+        expect(handler.calledWith(sinon.match(new Buffer("<html><body>test</body></html>")),
           "https://example.com/index1.html")).to.equal(true);
         done();
       }, 15);
@@ -494,7 +514,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
+        expect(handler.calledWith(sinon.match(new Buffer("<html><body>test</body></html>")),
           "https://example.com/index1.html")).to.equal(true);
         done();
       }, 15);
@@ -513,6 +533,25 @@ describe("Crawler", function () {
         crawler.stop();
         expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
           "https://example.com/index1.html")).to.equal(false);
+        done();
+      }, 15);
+    });
+
+    it("passes the content type as the third argument", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.addHandler(handler);
+      crawler.start();
+      pageContentType = "text/plain";
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(handler,
+          sinon.match(new Buffer("<html><body>test</body></html>")),
+          "https://example.com/index1.html",
+          "text/plain");
         done();
       }, 15);
     });

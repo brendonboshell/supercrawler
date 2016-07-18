@@ -12,6 +12,8 @@ When Supercrawler successfully crawls a page (which could be a image, text, etc)
   links and add them to the queue.
 * **Robots Parsing**. Supercrawler will request robots.txt and check the rules
   before crawling. It will also identify any sitemaps.
+* **Sitemaps Parsing**. Supercrawler will read links from XML sitemap files,
+  and add links to the queue.
 * **Concurrency Limiting**. Supercrawler limits the number of requests sent out
   at any one time.
 * **Rate limiting**. Supercrawler will add a delay between requests to avoid
@@ -40,7 +42,7 @@ from your handler, and Supercrawler will add them to the queue.
     crawler.addHandler("text/html", supercrawler.handlers.htmlLinkParser({
       hostnames: ["example.com"]
     }));
-    crawler.addHandler("text/html", function (body, url) {
+    crawler.addHandler("text/html", function (buf, url) {
       console.log("Got page", url);
     });
 
@@ -205,3 +207,16 @@ Example usage:
 
     var rp = supercrawler.handlers.robotsParser();
     crawler.addHandler("text/plain", supercrawler.handlers.robotsParser());
+
+# handlers.sitemapsParser
+
+A function that returns a handler which parses an XML sitemaps file. It will
+pick up any URLs matching `sitemapindex > sitemap > loc, urlset > url > loc`.
+
+It will also handle a gzipped file, since that it part of the sitemaps
+specification.
+
+Example usage:
+
+    var sp = supercrawler.handlers.sitemapsParser();
+    crawler.addHandler(supercrawler.handlers.sitemapsParser());

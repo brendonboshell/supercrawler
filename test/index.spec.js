@@ -5,6 +5,7 @@ var proxyquire = require('proxyquire'),
     DbUrlListMock,
     htmlLinkParserMock,
     robotsParserMock,
+    sitemapsParserMock,
     index;
 
 CrawlerMock = function () {};
@@ -12,13 +13,15 @@ UrlMock = function () {};
 DbUrlListMock = function () {};
 htmlLinkParserMock = function () {};
 robotsParserMock = function () {};
+sitemapsParserMock = function () {};
 
 index = proxyquire("../lib/index", {
   "./Crawler": CrawlerMock,
   "./Url": UrlMock,
   "./DbUrlList": DbUrlListMock,
   "./handlers/htmlLinkParser": htmlLinkParserMock,
-  "./handlers/robotsParser": robotsParserMock
+  "./handlers/robotsParser": robotsParserMock,
+  "./handlers/sitemapsParser": sitemapsParserMock
 });
 
 describe("index", function () {
@@ -40,5 +43,9 @@ describe("index", function () {
 
   it("exposes robotsParser", function () {
     expect(index.handlers.robotsParser).to.equal(robotsParserMock);
+  });
+
+  it("exposes sitemapsParser", function () {
+    expect(index.handlers.sitemapsParser).to.equal(sitemapsParserMock);
   });
 });

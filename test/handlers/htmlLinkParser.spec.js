@@ -11,7 +11,7 @@ makeHtmlWithLinks = function (links) {
 
   html += "</body>";
 
-  return html;
+  return new Buffer(html);
 };
 
 describe("HtmlLikParser", function () {

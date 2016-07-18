@@ -17,7 +17,7 @@ describe("robotsParser", function () {
   });
 
   it("can extract extract a absolute path sitemap", function () {
-    expect(rb(robotsTxt, "http://example.com/robots.txt")).to.deep.equal([
+    expect(rb(new Buffer(robotsTxt), "http://example.com/robots.txt")).to.deep.equal([
       "http://subdomain.example.com/sitemap_index_1.xml"
     ]);
   });
@@ -25,7 +25,7 @@ describe("robotsParser", function () {
   it("can extract extract a relative path sitemap", function () {
     robotsTxt += "\nSitemap: /sitemap_index.xml";
 
-    expect(rb(robotsTxt, "http://example.com/robots.txt")).to.deep.equal([
+    expect(rb(new Buffer(robotsTxt), "http://example.com/robots.txt")).to.deep.equal([
       "http://subdomain.example.com/sitemap_index_1.xml",
       "http://example.com/sitemap_index.xml"
     ]);
@@ -33,10 +33,10 @@ describe("robotsParser", function () {
 
   it("returns empty when there are no sitemaps", function () {
     robotsTxt = "";
-    expect(rb(robotsTxt, "http://example.com/robots.txt")).to.deep.equal([]);
+    expect(rb(new Buffer(robotsTxt), "http://example.com/robots.txt")).to.deep.equal([]);
   });
 
   it("returns empty when the URL path is not /robots.txt", function () {
-    expect(rb(robotsTxt, "http://example.com/Iamnotarobots.txt")).to.deep.equal([]);
+    expect(rb(new Buffer(robotsTxt), "http://example.com/Iamnotarobots.txt")).to.deep.equal([]);
   });
 });
