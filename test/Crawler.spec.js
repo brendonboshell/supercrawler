@@ -553,7 +553,7 @@ describe("Crawler", function () {
           "https://example.com/index1.html",
           "text/plain");
         done();
-      }, 15);
+      }, 100);
     });
 
     it("adds URL to the queue", function (done) {
