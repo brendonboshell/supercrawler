@@ -79,6 +79,9 @@ describe("DbUrlList", function () {
       };
     });
 
+    sequelizeMock.STRING = function (size) {
+      return "TEST_STRING" + size;
+    };
     sequelizeMock.prototype.define = defineSpy;
     sequelizeMock.prototype.UniqueConstraintError = function () { };
 
@@ -108,9 +111,12 @@ describe("DbUrlList", function () {
   it("defines the url table", function () {
     new DbUrlList(opts);
     sinon.assert.calledWith(defineSpy, "url", sinon.match({
-      url: {
+      urlHash: {
         allowNull: false,
         unique: true
+      },
+      url: {
+        allowNull: false
       },
       statusCode: {
         allowNull: true
@@ -123,6 +129,15 @@ describe("DbUrlList", function () {
       },
       nextRetryDate: {
         allowNull: false
+      }
+    }));
+  });
+
+  it("url field is max 10,000 characters long", function () {
+    new DbUrlList(opts);
+    sinon.assert.calledWith(defineSpy, "url", sinon.match({
+      url: {
+        type: "TEST_STRING10000"
       }
     }));
   });
@@ -149,6 +164,7 @@ describe("DbUrlList", function () {
     it("inserts record into table", function (done) {
       new DbUrlList(opts).insertIfNotExists(makeUrl("https://example.com", 201)).then(function () {
         sinon.assert.calledWith(createSpy, sinon.match({
+          urlHash: "327c3fda87ce286848a574982ddd0b7c7487f816",
           url: "https://example.com",
           statusCode: 201,
           errorCode: null,
@@ -166,6 +182,7 @@ describe("DbUrlList", function () {
       });
       new DbUrlList(opts).insertIfNotExists(url).then(function () {
         sinon.assert.calledWith(createSpy, sinon.match({
+          urlHash: "b559c7edd3fb67374c1a25e739cdd7edd1d79949",
           url: "https://example.com/",
           statusCode: 600,
           errorCode: "HTTP_ERROR",
@@ -189,6 +206,7 @@ describe("DbUrlList", function () {
     it("upserts record in database", function (done) {
       new DbUrlList(opts).upsert(makeUrl("https://example.com", 201)).then(function () {
         sinon.assert.calledWith(upsertSpy, sinon.match({
+          urlHash: "327c3fda87ce286848a574982ddd0b7c7487f816",
           url: "https://example.com",
           statusCode: 201,
           errorCode: null,
@@ -207,6 +225,7 @@ describe("DbUrlList", function () {
       numErrors = 5;
       new DbUrlList(opts).upsert(url).then(function () {
         sinon.assert.calledWith(upsertSpy, sinon.match({
+          urlHash: "b559c7edd3fb67374c1a25e739cdd7edd1d79949",
           url: "https://example.com/",
           statusCode: 600,
           errorCode: "HTTP_ERROR",
@@ -227,6 +246,7 @@ describe("DbUrlList", function () {
       numErrors = 5;
       new DbUrlList(opts).upsert(url).then(function () {
         sinon.assert.calledWith(upsertSpy, sinon.match({
+          urlHash: "b559c7edd3fb67374c1a25e739cdd7edd1d79949",
           url: "https://example.com/",
           statusCode: 600,
           errorCode: "HTTP_ERROR",
