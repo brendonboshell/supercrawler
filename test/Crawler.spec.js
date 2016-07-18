@@ -260,7 +260,7 @@ describe("Crawler", function () {
 
     it("caches robots.txt for a specified amount of time", function (done) {
       var crawler = new Crawler({
-        interval: 50, // 50 ms
+        interval: 20, // 20 ms
         concurrentRequestsLimit: 1,
         robotsCacheTime: 100 // 100ms
       });
