@@ -13,8 +13,14 @@ describe("DbUrlList", function () {
       createSpy,
       upsertSpy,
       numErrors,
+      findNum,
       findOneResult,
+      findOneResultSecond,
       findOneSpy,
+      updateResult,
+      updateResultSecond,
+      updateCallNum,
+      updateSpy,
       DbUrlList,
       createRes;
 
@@ -48,6 +54,7 @@ describe("DbUrlList", function () {
     });
 
     numErrors = 0;
+    findNum = 0;
 
     findOneResult = Promise.resolve({
       get: function (field) {
@@ -65,9 +72,46 @@ describe("DbUrlList", function () {
         }
       }
     });
+    findOneResultSecond = Promise.resolve({
+      get: function (field) {
+        if (field === "url") {
+          return "https://example.com/tocrawl2";
+        }
+        if (field === "statusCode") {
+          return null;
+        }
+        if (field === "errorCode") {
+          return null;
+        }
+        if (field === "numErrors") {
+          return numErrors;
+        }
+      }
+    });
 
     findOneSpy = sinon.spy(function () {
+      findNum++;
+
+      if (findNum === 2) {
+        return findOneResultSecond;
+      }
+
       return findOneResult;
+    });
+
+    updateResult = Promise.resolve([1]);
+    updateResultSecond = Promise.resolve([2]);
+    updateCallNum = 0;
+
+    updateSpy = sinon.spy(function () {
+      updateCallNum++;
+
+      // this is so we can test what happens if the first request fails.
+      if (updateCallNum === 2) {
+        return updateResultSecond;
+      }
+
+      return updateResult;
     });
 
     defineSpy = sinon.spy(function () {
@@ -75,7 +119,8 @@ describe("DbUrlList", function () {
         sync: syncSpy,
         create: createSpy,
         upsert: upsertSpy,
-        findOne: findOneSpy
+        findOne: findOneSpy,
+        update: updateSpy
       };
     });
 
@@ -276,6 +321,29 @@ describe("DbUrlList", function () {
             }]
           }
         }));
+        done();
+      });
+    });
+
+    it("tries to update the holdDate field", function (done) {
+      new DbUrlList(opts).getNextUrl().then(function () {
+        sinon.assert.calledWith(updateSpy, sinon.match({
+          holdDate: sinon.match(Date)
+        }, sinon.match({
+          where: {
+            id: sinon.match(Number),
+            holdDate: sinon.match(Date)
+          }
+        })));
+        done();
+      });
+    });
+
+    it("tries again if record gets snatched by another process", function (done) {
+      updateResult = Promise.resolve([0]);
+
+      new DbUrlList(opts).getNextUrl().then(function (url) {
+        expect(url.getUrl()).to.equal("https://example.com/tocrawl2");
         done();
       });
     });
