@@ -95,4 +95,24 @@ describe("HtmlLikParser", function () {
       "https://example.com/101?q=str"
     ]);
   });
+
+  it("identifies <link rel='alternative'> tags", function () {
+    var hlp = htmlLinkParser(),
+        html;
+
+    html = "<link href=\"/index-es/\" hreflang=\"es\" rel=\"alternate\">";
+
+    expect(hlp(html, "http://example.com")).to.deep.equal([
+      "http://example.com/index-es/"
+    ]);
+  });
+
+  it("does not identify <link rel='stylesheet'> tags", function () {
+    var hlp = htmlLinkParser(),
+        html;
+
+    html = "<link href=\"styles.css\" type=\"text/css\" rel=\"stylesheet\">";
+
+    expect(hlp(html, "http://example.com")).to.deep.equal([]);
+  });
 });

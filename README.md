@@ -282,6 +282,10 @@ Example usage:
 
 ## Changelog
 
+### 0.5.0
+
+* [Changed] `htmlLinkParser` now also picks up `link` tags where `rel=alternate`.
+
 ### 0.4.0
 
 * [Changed] Supercrawler no longer follows redirects on crawled URLs. Supercrawler will now add a redirected URL to the queue as a separate entry. We still follow redirects for the `/robots.txt` that is used for checking rules; but not for `/robots.txt` added to the queue.
