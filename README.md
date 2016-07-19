@@ -130,10 +130,12 @@ crawler with the following options:
 
 Example usage:
 
-    var crawler = new supercrawler.Crawler({
-      interval: 1000,
-      concurrentRequestsLimit: 1
-    });
+```js
+var crawler = new supercrawler.Crawler({
+  interval: 1000,
+  concurrentRequestsLimit: 1
+});
+```
 
 The following methods are available:
 
@@ -148,6 +150,12 @@ The following methods are available:
 | addHandler(handler) | Add a handler for all content types. |
 | addHandler(contentType, handler) | Add a handler for a specific content type. |
 
+The `Crawler` object fires the following events:
+
+| Event | Description |
+| --- | --- |
+| crawlurl(url) | Fires when crawling starts with a new URL. |
+| urllistempty | Fires when the URL list is empty. |
 
 ## DbUrlList
 
@@ -166,17 +174,19 @@ Options:
 
 Example usage:
 
-    new supercrawler.DbUrlList({
-      db: {
-        database: "crawler",
-        username: "root",
-        password: "password",
-        sequelizeOpts: {
-          dialect: "mysql",
-          host: "localhost"
-        }
-      }
-    })
+```js
+new supercrawler.DbUrlList({
+  db: {
+    database: "crawler",
+    username: "root",
+    password: "password",
+    sequelizeOpts: {
+      dialect: "mysql",
+      host: "localhost"
+    }
+  }
+})
+```
 
 The following methods are available:
 
@@ -217,13 +227,17 @@ information about errors and status codes.
 
 Example usage:
 
-    var url = new supercrawler.Url({
-      url: "https://example.com"
-    });
+```js
+var url = new supercrawler.Url({
+  url: "https://example.com"
+});
+```
 
 You can also call it just a string URL:
 
-    var url = new supercrawler.Url("https://example.com");
+```js
+var url = new supercrawler.Url("https://example.com");
+```
 
 The following methods are available:
 
@@ -245,10 +259,11 @@ links.
 
 Example usage:
 
-    var hlp = supercrawler.handlers.htmlLinkParser({
-      hostnames: ["example.com"]
-    });
-
+```js
+var hlp = supercrawler.handlers.htmlLinkParser({
+  hostnames: ["example.com"]
+});
+```
 
 ## handlers.robotsParser
 
@@ -264,8 +279,10 @@ to add a sitemap parser.
 
 Example usage:
 
-    var rp = supercrawler.handlers.robotsParser();
-    crawler.addHandler("text/plain", supercrawler.handlers.robotsParser());
+```js
+var rp = supercrawler.handlers.robotsParser();
+crawler.addHandler("text/plain", supercrawler.handlers.robotsParser());
+```
 
 ## handlers.sitemapsParser
 
@@ -277,10 +294,17 @@ specification.
 
 Example usage:
 
-    var sp = supercrawler.handlers.sitemapsParser();
-    crawler.addHandler(supercrawler.handlers.sitemapsParser());
+```js
+var sp = supercrawler.handlers.sitemapsParser();
+crawler.addHandler(supercrawler.handlers.sitemapsParser());
+```
 
 ## Changelog
+
+### 0.6.0
+
+* [Added] Crawler fires the `urllistempty` and `crawlurl` events. It also
+captures the `RangeError` event when the URL list is empty.
 
 ### 0.5.0
 

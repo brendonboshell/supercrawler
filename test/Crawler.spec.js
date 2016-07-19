@@ -2,34 +2,16 @@ var proxyquire = require('proxyquire'),
     sinon = require("sinon"),
     expect = require("chai").expect,
     makeUrl = require("./utils/makeUrl"),
-    Promise = require("bluebird"),
-    FifoUrlListMock;
+    Promise = require("bluebird");
 
 // Note: I cannot get sinon's useFakeTimers to behave with Bluebird's
 // promises. The calls to .finally(\Function) seem to only be called at the
 // last minute. Instead, the tests are using actual timing, which is not ideal.
 
-FifoUrlListMock = function () {
-  this.callCount = 0;
-  this.delayTime = 1;
-};
-
-FifoUrlListMock.prototype.getNextUrl = function () {
-  var self = this;
-
-  this.callCount++;
-
-  if (this.callCount >= 20) {
-    return Promise.reject(new RangeError("rangeerror"));
-  }
-
-  return Promise.delay(this.delayTime).then(function () {
-    return makeUrl("https://example.com/index" + self.callCount + ".html");
-  });
-};
-
 describe("Crawler", function () {
   var Crawler,
+      listSize,
+      FifoUrlListMock,
       requestSpy,
       insertIfNotExistsSpy,
       upsertSpy,
@@ -49,6 +31,26 @@ describe("Crawler", function () {
       "Allow: /",
       "Disallow: /index17.html"
     ].join("\n");
+    listSize = 20;
+
+    FifoUrlListMock = function () {
+      this.callCount = 0;
+      this.delayTime = 1;
+    };
+
+    FifoUrlListMock.prototype.getNextUrl = function () {
+      var self = this;
+
+      this.callCount++;
+
+      if (this.callCount >= listSize) {
+        return Promise.reject(new RangeError("rangeerror"));
+      }
+
+      return Promise.delay(this.delayTime).then(function () {
+        return makeUrl("https://example.com/index" + self.callCount + ".html");
+      });
+    };
 
     requestSpy = sinon.spy(function (opts, cb) {
       if (opts.url.indexOf("robots") === -1) {
@@ -194,7 +196,6 @@ describe("Crawler", function () {
   });
 
   describe("#start", function () {
-
     it("returns false if crawl is already running", function () {
       var crawler;
 
@@ -213,6 +214,22 @@ describe("Crawler", function () {
       expect(crawler.start()).to.equal(true);
       crawler.stop();
     });
+
+    it("emits a urllistempty event if no URLs", function (done) {
+      var crawler = new Crawler({ interval: 50 }),
+          listenSpy = sinon.spy();
+
+      listSize = 0;
+      crawler.on("urllistempty", listenSpy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.called(listenSpy);
+        done();
+      }, 100);
+    });
+
 
     it("throttles requests according to the interval", function (done) {
       var crawler = new Crawler({
@@ -341,6 +358,20 @@ describe("Crawler", function () {
       setTimeout(function () {
         crawler.stop();
         expect(numCrawlsOfUrl("https://example.com/index18.html", false)).to.equal(1);
+        done();
+      }, 200);
+    });
+
+    it("emits the crawlurl event", function (done) {
+      var crawler = new Crawler({ interval: 10 });
+      var spy = sinon.spy();
+
+      crawler.on("crawlurl", spy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(spy, "https://example.com/index18.html");
         done();
       }, 200);
     });
