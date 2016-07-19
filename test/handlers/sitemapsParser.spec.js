@@ -68,4 +68,15 @@ describe("sitemapsParser", function () {
       done();
     });
   });
+
+  it("supports the application/gzip content type", function (done) {
+    Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
+      return sp(buf, "http://example.com/sitemap_index.xml", "application/gzip");
+    }).then(function (urls) {
+      expect(urls).to.deep.equal([
+        "https://example.com/home.html"
+      ]);
+      done();
+    });
+  });
 });

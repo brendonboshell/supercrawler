@@ -301,6 +301,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.6.1
+
+* [Fix] Support sitemaps with content type `application/gzip` as well as
+`application/x-gzip`.
+
 ### 0.6.0
 
 * [Added] Crawler fires the `urllistempty` and `crawlurl` events. It also
