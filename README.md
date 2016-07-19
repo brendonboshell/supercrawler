@@ -279,3 +279,54 @@ Example usage:
 
     var sp = supercrawler.handlers.sitemapsParser();
     crawler.addHandler(supercrawler.handlers.sitemapsParser());
+
+## Changelog
+
+### 0.4.0
+
+* [Changed] Supercrawler no longer follows redirects on crawled URLs. Supercrawler will now add a redirected URL to the queue as a separate entry. We still follow redirects for the `/robots.txt` that is used for checking rules; but not for `/robots.txt` added to the queue.
+
+### 0.3.3
+
+* [Fix] `DbUrlList` to mark a URL as taken, and ensure it never returns a URL that is being crawled in another concurrent request. This has required a new field called `holdDate` on the `url` table
+
+### 0.3.2
+
+* [Fix] Time-based unit tests made more reliable.
+
+### 0.3.1
+
+* [Added] Support for Travis CI.
+
+### 0.3.0
+
+* [Added] Content type passed as third argument to all content type handlers.
+* [Added] Sitemaps parser to extract sitemap URLs and urlset URLs.
+* [Changed] Content handlers receive Buffers rather than strings for the first argument.
+* [Fix] Robots.txt checking to work for the first crawled URL. There was a bug that caused robots.txt to be ignored if it wasn't in the cache.
+
+### 0.2.3
+
+* [Added] A robots.txt parser that identifies `Sitemap:` directives.
+
+### 0.2.2
+
+* [Fixed] Support for URLs up to 10,000 characters long. This required a new `urlHash` SHA1 field on the `url` table, to support the unique index.
+
+### 0.2.1
+
+* [Added] Extensive documentation.
+
+### 0.2.0
+
+* [Added] Status code is updated in the queue for successfully crawled pages (HTTP code < 400).
+* [Added] A new error type `error.RequestError` for all errors that occur when requesting a page.
+* [Added] `DbUrlList` queue object that stores URLs in a SQL database. Includes exponetial backoff retry logic.
+* [Changed] Interface to `DbUrlList` and `FifoUrlList` is now via methods `insertIfNotExists`, `upsert` and `getNextUrl`. Previously, it was just `insert` (which also updated) and `upsert`, but we need a way to differentiate between discovered URLs which should not update the crawl state.
+
+### 0.1.0
+
+* [Added] `Crawler` object, supporting rate limiting, concurrent requests limiting, robots.txt caching.
+* [Added] `FifoUrlList` object, a first-in, first-out in-memory list of URLs to be crawled.
+* [Added] `Url` object, representing a URL in the crawl queue.
+* [Added] `htmlLinkParser`, a function to extract links from crawled HTML documents.

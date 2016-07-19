@@ -34,6 +34,7 @@ describe("Crawler", function () {
       insertIfNotExistsSpy,
       upsertSpy,
       pageContentType,
+      pageLocationHeader,
       pageStatusCode,
       pageBody,
       robotsStatusCode,
@@ -56,6 +57,10 @@ describe("Crawler", function () {
 
           if (pageContentType) {
             headers["content-type"] = pageContentType;
+          }
+
+          if (pageLocationHeader) {
+            headers.location = pageLocationHeader;
           }
 
           if (pageStatusCode === 0) {
@@ -103,7 +108,7 @@ describe("Crawler", function () {
     });
   });
 
-  var numCrawlsOfUrl = function (url) {
+  var numCrawlsOfUrl = function (url, followRedirect) {
     var numCalls = 0;
     var n = 0;
     var call;
@@ -113,7 +118,8 @@ describe("Crawler", function () {
 
       if (call.calledWith(sinon.match({
         url: url,
-        forever: true
+        forever: true,
+        followRedirect: followRedirect
       }))) {
         numCalls++;
       }
@@ -125,7 +131,7 @@ describe("Crawler", function () {
   };
 
   var numRobotsCalls = function () {
-    return numCrawlsOfUrl("https://example.com/robots.txt");
+    return numCrawlsOfUrl("https://example.com/robots.txt", true);
   };
 
   it("returns an instance when called as a function", function () {
@@ -291,6 +297,40 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("will add destination URL to queue when redirected", function (done) {
+      var crawler = new Crawler({ interval: 10 });
+
+      crawler.start();
+
+      pageStatusCode = 301;
+      pageLocationHeader = "https://example.com/destination.html";
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
+          _url: "https://example.com/destination.html"
+        }));
+        done();
+      }, 200);
+    });
+
+    it("will add relative destination URL to queue when redirected", function (done) {
+      var crawler = new Crawler({ interval: 10 });
+
+      crawler.start();
+
+      pageStatusCode = 301;
+      pageLocationHeader = "/destination2.html";
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
+          _url: "https://example.com/destination2.html"
+        }));
+        done();
+      }, 200);
+    });
+
     it("requests a page that is not excluded by robots.txt", function (done) {
       var crawler = new Crawler({
         interval: 10
@@ -300,7 +340,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(numCrawlsOfUrl("https://example.com/index18.html")).to.equal(1);
+        expect(numCrawlsOfUrl("https://example.com/index18.html", false)).to.equal(1);
         done();
       }, 200);
     });
@@ -318,7 +358,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(numCrawlsOfUrl("https://example.com/index1.html")).to.equal(0);
+        expect(numCrawlsOfUrl("https://example.com/index1.html", false)).to.equal(0);
         done();
       }, 200);
     });
@@ -332,7 +372,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(numCrawlsOfUrl("https://example.com/index17.html")).to.equal(0);
+        expect(numCrawlsOfUrl("https://example.com/index17.html", false)).to.equal(0);
         done();
       }, 200);
     });
@@ -347,7 +387,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(numCrawlsOfUrl("https://example.com/index17.html")).to.equal(1);
+        expect(numCrawlsOfUrl("https://example.com/index17.html", false)).to.equal(1);
         done();
       }, 200);
     });
@@ -362,7 +402,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(numCrawlsOfUrl("https://example.com/index5.html")).to.equal(0);
+        expect(numCrawlsOfUrl("https://example.com/index5.html", false)).to.equal(0);
         done();
       }, 200);
     });
