@@ -11,6 +11,7 @@ describe("DbUrlList", function () {
       defineSpy,
       syncSpy,
       createSpy,
+      bulkCreateSpy,
       upsertSpy,
       numErrors,
       findNum,
@@ -47,6 +48,10 @@ describe("DbUrlList", function () {
     createRes = Promise.resolve();
     createSpy = sinon.spy(function () {
       return createRes;
+    });
+
+    bulkCreateSpy = sinon.spy(function () {
+      return Promise.resolve();
     });
 
     upsertSpy = sinon.spy(function () {
@@ -118,6 +123,7 @@ describe("DbUrlList", function () {
       return {
         sync: syncSpy,
         create: createSpy,
+        bulkCreate: bulkCreateSpy,
         upsert: upsertSpy,
         findOne: findOneSpy,
         update: updateSpy
@@ -242,6 +248,32 @@ describe("DbUrlList", function () {
       createRes = Promise.reject(new sequelizeMock.UniqueConstraintError());
 
       new DbUrlList(opts).insertIfNotExists(makeUrl("https://example.com")).then(function () {
+        done();
+      });
+    });
+  });
+
+  describe("#insertIfNotExistsBulk", function () {
+    it("inserts multiple records in one go", function (done) {
+      new DbUrlList(opts).insertIfNotExistsBulk([
+        makeUrl("https://example.com"),
+        makeUrl("https://example.com/page2.html")
+      ]).then(function () {
+        sinon.assert.calledWith(bulkCreateSpy, sinon.match([sinon.match({
+          urlHash: "327c3fda87ce286848a574982ddd0b7c7487f816",
+          url: "https://example.com",
+          statusCode: null,
+          errorCode: null,
+          numErrors: 0
+        }), sinon.match({
+          urlHash: "cf1b134e852ef25837ff7ed5888684a8f5213213",
+          url: "https://example.com/page2.html",
+          statusCode: null,
+          errorCode: null,
+          numErrors: 0
+        })]), sinon.match({
+          ignoreDuplicates: true
+        }));
         done();
       });
     });

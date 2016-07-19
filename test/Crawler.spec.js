@@ -14,6 +14,7 @@ describe("Crawler", function () {
       FifoUrlListMock,
       requestSpy,
       insertIfNotExistsSpy,
+      insertIfNotExistsBulkSpy,
       upsertSpy,
       pageContentType,
       pageLocationHeader,
@@ -97,6 +98,10 @@ describe("Crawler", function () {
     });
 
     FifoUrlListMock.prototype.insertIfNotExists = insertIfNotExistsSpy;
+
+    insertIfNotExistsBulkSpy = sinon.spy(function () {
+      return Promise.resolve();
+    });
 
     upsertSpy = sinon.spy(function () {
       return Promise.resolve();
@@ -647,6 +652,30 @@ describe("Crawler", function () {
         sinon.assert.calledWith(insertIfNotExistsSpy, sinon.match({
           _url: "https://example.com/page98.html"
         }));
+        done();
+      }, 15);
+    });
+
+    it("uses the bulk insert method if it exists", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      handlerRet = [
+        "https://example.com/page98.html",
+        "https://example.com/page99.html"
+      ];
+      crawler.addHandler(handler);
+      crawler.getUrlList().insertIfNotExistsBulk = insertIfNotExistsBulkSpy;
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(insertIfNotExistsBulkSpy, sinon.match([sinon.match({
+          _url: "https://example.com/page98.html"
+        }), sinon.match({
+          _url: "https://example.com/page99.html"
+        })]));
         done();
       }, 15);
     });

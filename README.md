@@ -301,6 +301,12 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.7.0
+
+* [Added] Support for optional `insertIfNotExistsBulk` method which can insert
+a large list of URLs into the crawl queue.
+* [Updated] `DbUrlList` supports the bulk insert method.
+
 ### 0.6.1
 
 * [Fix] Support sitemaps with content type `application/gzip` as well as
