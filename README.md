@@ -292,6 +292,10 @@ pick up any URLs matching `sitemapindex > sitemap > loc, urlset > url > loc`.
 It will also handle a gzipped file, since that it part of the sitemaps
 specification.
 
+| Option | Description |
+| --- | --- |
+| urlFilter | Function that takes a URL and returns `true` if it should be included. |
+
 Example usage:
 
 ```js
@@ -300,6 +304,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 0.9.0
+
+* [Added] Support for a custom URL filter on the `sitemapsParser` function.
 
 ### 0.8.0
 
