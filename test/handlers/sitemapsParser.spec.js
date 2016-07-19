@@ -58,6 +58,26 @@ describe("sitemapsParser", function () {
     });
   });
 
+  it("discovers an alternate link", function (done) {
+    urlset = [
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+      "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" >",
+      "<url>",
+      "<loc>https://example.com/home.html</loc>",
+      "<xhtml:link rel=\"alternate\" hreflang=\"de\" href=\"https://example.com/home-de.html\" />",
+      "</url>",
+      "</urlset>]"
+    ].join("\n");
+
+    sp(new Buffer(urlset), "http://example.com/sitemap_index.xml").then(function (urls) {
+      expect(urls).to.deep.equal([
+        "https://example.com/home.html",
+        "https://example.com/home-de.html"
+      ]);
+      done();
+    });
+  });
+
   it("supports a .gz sitemap file", function (done) {
     Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
       return sp(buf, "http://example.com/sitemap_index.xml", "application/x-gzip");

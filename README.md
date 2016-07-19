@@ -301,11 +301,16 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.8.0
+
+* [Changed] Sitemaps parser now extracts `<xhtml:link rel="alternate">` URLs,
+in addition to the `<loc>` URLs.
+
 ### 0.7.0
 
 * [Added] Support for optional `insertIfNotExistsBulk` method which can insert
 a large list of URLs into the crawl queue.
-* [Updated] `DbUrlList` supports the bulk insert method.
+* [Changed] `DbUrlList` supports the bulk insert method.
 
 ### 0.6.1
 
