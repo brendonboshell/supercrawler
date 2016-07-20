@@ -31,6 +31,18 @@ describe("robotsParser", function () {
     ]);
   });
 
+  it ("can apply a filter to the URLs discovered", function () {
+    var rb = robotsParser({
+      urlFilter: function (sitemapUrl) {
+        return sitemapUrl.indexOf("sitemap_index.xml") === -1;
+      }
+    });
+
+    expect(rb(new Buffer(robotsTxt), "http://example.com/robots.txt")).to.deep.equal([
+      "http://subdomain.example.com/sitemap_index_1.xml"
+    ]);
+  });
+
   it("returns empty when there are no sitemaps", function () {
     robotsTxt = "";
     expect(rb(new Buffer(robotsTxt), "http://example.com/robots.txt")).to.deep.equal([]);

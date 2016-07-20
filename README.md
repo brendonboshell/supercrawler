@@ -277,6 +277,10 @@ It will ignore any files that are not `/robots.txt`.
 If you want to extract the URLs from those XML sitemaps, you will also need
 to add a sitemap parser.
 
+| Option | Description |
+| --- | --- |
+| urlFilter(sitemapUrl, robotsTxtUrl) | Function that takes a URL and returns `true` if it should be included. |
+
 Example usage:
 
 ```js
@@ -304,6 +308,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 0.10.0
+
+* [Added] Support for a custom URL filter on the `robotsParser` function.
 
 ### 0.9.1
 
