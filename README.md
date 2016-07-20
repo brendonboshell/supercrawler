@@ -305,6 +305,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.9.1
+
+* [Fixed] Performance improvement for sitemaps parser. Very large sitemap
+previous took 25 seconds, now takes 1-2 seconds.
+
 ### 0.9.0
 
 * [Added] Support for a custom URL filter on the `sitemapsParser` function.
