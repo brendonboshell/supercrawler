@@ -512,6 +512,36 @@ describe("Crawler", function () {
         done();
       }, 100);
     });
+
+    it("uses a cookie jar, preventing infinite redirects on some crap websites", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(requestSpy, sinon.match({
+          jar: true
+        }));
+        done();
+      }, 100);
+    });
+
+    it("doesn't use cookie jar if turned off", function (done) {
+      var crawler = new Crawler({ interval: 10, cookies: false });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(requestSpy.calledWith(sinon.match({
+          jar: true
+        }))).to.equal(false);
+        done();
+      }, 100);
+    });
   });
 
   describe("#addHandler", function () {
