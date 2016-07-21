@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.10.2
+
+* [Fixed] When content handler throws an exception / rejects a Promise, it will
+be marked as an error. (And scheduled for a retry if using `DbUrlList`).
+
 ### 0.10.1
 
 * [Fixed] Request sends `Accept-Encoding: gzip, deflate` header, so the

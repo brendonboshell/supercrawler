@@ -713,5 +713,24 @@ describe("Crawler", function () {
         done();
       }, 15);
     });
+
+    it("records a HANDLERS_ERROR if exception thrown", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      handlerRet = Promise.reject(new Error("Something went wrong"));
+      crawler.addHandler(handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(upsertSpy, sinon.match({
+          _url: "https://example.com/index1.html",
+          _errorCode: "HANDLERS_ERROR"
+        }));
+        done();
+      }, 15);
+    });
   });
 });
