@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.10.1
+
+* [Fixed] Request sends `Accept-Encoding: gzip, deflate` header, so the
+responses arrive compressed (saving data transfer).
+
 ### 0.10.0
 
 * [Added] Support for a custom URL filter on the `robotsParser` function.

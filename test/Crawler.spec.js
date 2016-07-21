@@ -496,6 +496,22 @@ describe("Crawler", function () {
         done();
       }, 200);
     });
+
+    it("asks for a gzipped response", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(requestSpy, sinon.match({
+          gzip: true
+        }));
+        done();
+      }, 100);
+    });
   });
 
   describe("#addHandler", function () {
