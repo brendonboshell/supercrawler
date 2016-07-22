@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.11.0
+
+* [Added] Event called `handlersError` is emitted if any of the handlers
+returns an error.
+
 ### 0.10.4
 
 * [Fixed] Shortend `urlHash` field to 40 characters, in case tables are using

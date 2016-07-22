@@ -732,5 +732,24 @@ describe("Crawler", function () {
         done();
       }, 15);
     });
+
+    it("emits a handlersError event if exception thrown", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+      var listenSpy = sinon.spy();
+      var err = new Error("test");
+
+      handlerRet = Promise.reject(err);
+      crawler.addHandler(handler);
+      crawler.on("handlersError", listenSpy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(listenSpy, err);
+        done();
+      }, 15);
+    });
   });
 });
