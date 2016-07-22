@@ -163,8 +163,7 @@ describe("DbUrlList", function () {
     new DbUrlList(opts);
     sinon.assert.calledWith(defineSpy, "url", sinon.match({
       urlHash: {
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
       url: {
         allowNull: false
@@ -177,10 +176,15 @@ describe("DbUrlList", function () {
       },
       numErrors: {
         allowNull: false
-      },
-      nextRetryDate: {
-        allowNull: false
       }
+    }), sinon.match({
+      indexes: sinon.match([sinon.match({
+        unique: false,
+        fields: sinon.match(["nextRetryDate"])
+      }), sinon.match({
+        unique: true,
+        fields: sinon.match(["urlHash"])
+      })])
     }));
   });
 
@@ -333,6 +337,25 @@ describe("DbUrlList", function () {
         done();
       });
     });
+
+    it("can upsert an uncrawled URL", function (done) {
+      var url = new Url({
+        url: "https://example.com/",
+        errorCode: null,
+        statusCode: null
+      });
+      new DbUrlList(opts).upsert(url).then(function () {
+        sinon.assert.calledWith(upsertSpy, sinon.match({
+          urlHash: "b559c7edd3fb67374c1a25e739cdd7edd1d79949",
+          url: "https://example.com/",
+          statusCode: null,
+          errorCode: null,
+          numErrors: 0,
+          nextRetryDate: sinon.match(Date)
+        }));
+        done();
+      });
+    });
   });
 
   describe("#getNextUrl", function () {
@@ -340,17 +363,9 @@ describe("DbUrlList", function () {
       new DbUrlList(opts).getNextUrl().then(function () {
         sinon.assert.calledWith(findOneSpy, sinon.match({
           where: {
-            $or: [{
-              errorCode: null,
-              statusCode: null
-            }, {
-              errorCode: {
-                $not: null
-              },
-              nextRetryDate: sinon.match({
-                $lt: sinon.match(Date)
-              })
-            }]
+            nextRetryDate: sinon.match({
+              $lt: sinon.match(Date)
+            })
           }
         }));
         done();
@@ -360,11 +375,11 @@ describe("DbUrlList", function () {
     it("tries to update the holdDate field", function (done) {
       new DbUrlList(opts).getNextUrl().then(function () {
         sinon.assert.calledWith(updateSpy, sinon.match({
-          holdDate: sinon.match(Date)
+          nextRetryDate: sinon.match(Date)
         }, sinon.match({
           where: {
             id: sinon.match(Number),
-            holdDate: sinon.match(Date)
+            nextRetryDate: sinon.match(Date)
           }
         })));
         done();

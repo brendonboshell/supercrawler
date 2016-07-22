@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.10.3
+
+* [Fixed] URLs are now crawled in a random order. Improved the `getNextUrl`
+function of `DbUrlList` to use a more optimized query.
+
 ### 0.10.2
 
 * [Fixed] When content handler throws an exception / rejects a Promise, it will
