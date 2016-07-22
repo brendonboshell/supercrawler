@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.10.4
+
+* [Fixed] Shortend `urlHash` field to 40 characters, in case tables are using
+`utf8mb4` collations for strings.
+
 ### 0.10.3
 
 * [Fixed] URLs are now crawled in a random order. Improved the `getNextUrl`
