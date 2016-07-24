@@ -44,7 +44,10 @@ describe("sitemapsParser", function () {
 
   // sitemaps can be either XML or a plain list of links.
   it("discovers another sitemap", function (done) {
-    sp(new Buffer(sitemapindex), "http://example.com/sitemap_index.xml").then(function (urls) {
+    sp({
+      body: new Buffer(sitemapindex),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
       expect(urls).to.deep.equal([
         "http://example.com/sitemap.xml.gz"
       ]);
@@ -54,14 +57,20 @@ describe("sitemapsParser", function () {
 
   it("discovers nothing if not a sitemap file", function (done) {
     sitemapindex = "<html><body><h1>I'm not a sitemap</h1></body></html>";
-    sp(new Buffer(sitemapindex), "http://example.com/sitemap_index.xml").then(function (urls) {
+    sp({
+      body: new Buffer(sitemapindex),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
       expect(urls).to.deep.equal([]);
       done();
     });
   });
 
   it("discovers a urlset", function (done) {
-    sp(new Buffer(urlset), "http://example.com/sitemap_index.xml").then(function (urls) {
+    sp({
+      body: new Buffer(urlset),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html"
       ]);
@@ -70,7 +79,10 @@ describe("sitemapsParser", function () {
   });
 
   it("discovers an alternate link", function (done) {
-    sp(new Buffer(urlsetWithAlternate), "http://example.com/sitemap_index.xml").then(function (urls) {
+    sp({
+      body: new Buffer(urlsetWithAlternate),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html",
         "https://example.com/home-de.html"
@@ -86,7 +98,10 @@ describe("sitemapsParser", function () {
       }
     });
 
-    sp(new Buffer(urlsetWithAlternate), "http://example.com/sitemap_index.xml").then(function (urls) {
+    sp({
+      body: new Buffer(urlsetWithAlternate),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html"
       ]);
@@ -96,7 +111,11 @@ describe("sitemapsParser", function () {
 
   it("supports a .gz sitemap file", function (done) {
     Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
-      return sp(buf, "http://example.com/sitemap_index.xml", "application/x-gzip");
+      return sp({
+        body: buf,
+        url: "http://example.com/sitemap_index.xml",
+        contentType: "application/x-gzip"
+      });
     }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html"
@@ -107,7 +126,11 @@ describe("sitemapsParser", function () {
 
   it("supports the application/gzip content type", function (done) {
     Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
-      return sp(buf, "http://example.com/sitemap_index.xml", "application/gzip");
+      return sp({
+        body: buf,
+        url: "http://example.com/sitemap_index.xml",
+        contentType: "application/gzip"
+      });
     }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html"

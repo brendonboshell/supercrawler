@@ -97,9 +97,9 @@ crawler.addHandler("text/html", supercrawler.handlers.htmlLinkParser({
 }));
 
 // Custom content handler for HTML pages.
-crawler.addHandler("text/html", function (buf, url) {
-  var sizeKb = Buffer.byteLength(buf) / 1024;
-  logger.info("Processed", url, "Size=", sizeKb, "KB");
+crawler.addHandler("text/html", function (context) {
+  var sizeKb = Buffer.byteLength(context.body) / 1024;
+  logger.info("Processed", context.url, "Size=", sizeKb, "KB");
 });
 ```
 
@@ -308,6 +308,13 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 0.12.0
+
+* [Change] Rather than calling content handlers with (body, url), they are
+now called with a single `context` argument. This allows you to pass information
+forwards via handlers. For example, you might cache the `cheerio` parsing
+so you don't parse with every content handler.
 
 ### 0.11.0
 

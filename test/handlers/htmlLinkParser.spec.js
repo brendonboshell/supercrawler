@@ -21,7 +21,10 @@ describe("HtmlLikParser", function () {
 
     html = makeHtmlWithLinks(["https://example.com/test"]);
 
-    expect(hlp(html, "https://example2.com/index")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "https://example2.com/index"
+    })).to.deep.equal([
       "https://example.com/test"
     ]);
   });
@@ -32,7 +35,10 @@ describe("HtmlLikParser", function () {
 
     html = makeHtmlWithLinks(["page2.html"]);
 
-    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "https://example.com/my/page.html"
+    })).to.deep.equal([
       "https://example.com/my/page2.html"
     ]);
   });
@@ -43,7 +49,10 @@ describe("HtmlLikParser", function () {
 
     html = makeHtmlWithLinks(["/page2.html"]);
 
-    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "https://example.com/my/page.html"
+    })).to.deep.equal([
       "https://example.com/page2.html"
     ]);
   });
@@ -58,7 +67,10 @@ describe("HtmlLikParser", function () {
       "https://example2.com/55"
     ]);
 
-    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "https://example.com/my/page.html"
+    })).to.deep.equal([
       "https://example.com/page2.html",
       "https://example.com/my/page3.html",
       "https://example2.com/55"
@@ -73,7 +85,10 @@ describe("HtmlLikParser", function () {
       "javascript:alert('test')"
     ]);
 
-    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([]);
+    expect(hlp({
+      body: html,
+      url: "https://example.com/my/page.html"
+    })).to.deep.equal([]);
   });
 
   it("can restrict to specific hosts", function () {
@@ -89,7 +104,10 @@ describe("HtmlLikParser", function () {
       "https://example2.com/55"
     ]);
 
-    expect(hlp(html, "https://example.com/my/page.html")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "https://example.com/my/page.html"
+    })).to.deep.equal([
       "https://example.com/page2.html",
       "https://example.com/my/page3.html",
       "https://example.com/101?q=str"
@@ -102,7 +120,10 @@ describe("HtmlLikParser", function () {
 
     html = "<link href=\"/index-es/\" hreflang=\"es\" rel=\"alternate\">";
 
-    expect(hlp(html, "http://example.com")).to.deep.equal([
+    expect(hlp({
+      body: html,
+      url: "http://example.com"
+    })).to.deep.equal([
       "http://example.com/index-es/"
     ]);
   });
@@ -113,6 +134,9 @@ describe("HtmlLikParser", function () {
 
     html = "<link href=\"styles.css\" type=\"text/css\" rel=\"stylesheet\">";
 
-    expect(hlp(html, "http://example.com")).to.deep.equal([]);
+    expect(hlp({
+      body: html,
+      url: "http://example.com"
+    })).to.deep.equal([]);
   });
 });

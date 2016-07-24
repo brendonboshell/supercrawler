@@ -536,9 +536,11 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(handler,
-          sinon.match(new Buffer("<html><body>test</body></html>")),
-          "https://example.com/index1.html");
+        sinon.assert.calledWith(handler, sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html",
+          contentType: "text/plain"
+        }));
         done();
       }, 15);
     });
@@ -554,9 +556,11 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(handler,
-          sinon.match(new Buffer("<html><body>test</body></html>")),
-          "https://example.com/index1.html");
+        sinon.assert.calledWith(handler, sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html",
+          contentType: "text/html"
+        }));
         done();
       }, 15);
     });
@@ -572,8 +576,10 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
-          "https://example.com/index1.html")).to.equal(false);
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match("<html><body>test</body></html>"),
+          url: "https://example.com/index1.html"
+        }))).to.equal(false);
         done();
       }, 15);
     });
@@ -589,8 +595,10 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match(new Buffer("<html><body>test</body></html>")),
-          "https://example.com/index1.html")).to.equal(true);
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html"
+        }))).to.equal(true);
         done();
       }, 15);
     });
@@ -606,8 +614,10 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match(new Buffer("<html><body>test</body></html>")),
-          "https://example.com/index1.html")).to.equal(true);
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html"
+        }))).to.equal(true);
         done();
       }, 15);
     });
@@ -623,8 +633,10 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        expect(handler.calledWith(sinon.match("<html><body>test</body></html>"),
-          "https://example.com/index1.html")).to.equal(false);
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match("<html><body>test</body></html>"),
+          url: "https://example.com/index1.html"
+        }))).to.equal(false);
         done();
       }, 15);
     });
@@ -640,10 +652,11 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(handler,
-          sinon.match(new Buffer("<html><body>test</body></html>")),
-          "https://example.com/index1.html",
-          "text/plain");
+        sinon.assert.calledWith(handler, sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html",
+          contentType: "text/plain"
+        }));
         done();
       }, 100);
     });
