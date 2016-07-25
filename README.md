@@ -309,6 +309,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.12.1
+
+* [Fixed] Downgrade to cheerio 0.19, to fix a memory leak issue.
+
 ### 0.12.0
 
 * [Change] Rather than calling content handlers with (body, url), they are
