@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.13.1
+
+* [Fixed] `DbUrlList` doesn't fetch the existing record from the database unless
+there was an error.
+
 ### 0.13.0
 
 * [Added] `errorMessage` column on `urls` table that gives more information
