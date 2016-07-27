@@ -20,6 +20,10 @@ module.exports = function (url, statusCode) {
     return null;
   };
 
+  Url.prototype.getErrorMessage = function () {
+    return null;
+  };
+
   return new Url({
     url: url,
     statusCode: statusCode || null

@@ -49,4 +49,21 @@ describe("Url", function () {
       }).getErrorCode()).to.equal("ROBOTS_NOT_ALLOWED");
     });
   });
+
+  describe("#getErrorMessage", function () {
+    it("returns the error message", function () {
+      expect(new Url({
+        url: "https://example.com",
+        errorCode: "ROBOTS_NOT_ALLOWED",
+        errorMessage: "A robots.txt error"
+      }).getErrorMessage()).to.equal("A robots.txt error");
+    });
+
+    it("returns null if no rror message", function () {
+      expect(new Url({
+        url: "https://example.com",
+        errorCode: "ROBOTS_NOT_ALLOWED"
+      }).getErrorMessage()).to.equal(null);
+    });
+  });
 });

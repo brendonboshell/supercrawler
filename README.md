@@ -309,6 +309,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.13.0
+
+* [Added] `errorMessage` column on `urls` table that gives more information
+about, e.g., a handlers error that occurred.
+
 ### 0.12.1
 
 * [Fixed] Downgrade to cheerio 0.19, to fix a memory leak issue.
