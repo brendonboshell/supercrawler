@@ -309,6 +309,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.14.0
+
+* [Added] Crawler emits `redirect`, `links` and `httpError` events.
+
 ### 0.13.1
 
 * [Fixed] `DbUrlList` doesn't fetch the existing record from the database unless
