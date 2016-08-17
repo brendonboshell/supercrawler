@@ -32,6 +32,7 @@
   "dependencies": {
     "bluebird": "^3.4.1",
     "cheerio": "^0.19.0",
+    "ioredis": "^2.3.0",
     "mime-types": "^2.1.11",
     "node-cache": "^3.2.1",
     "request": "^2.73.0",
