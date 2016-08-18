@@ -23,7 +23,9 @@ When Supercrawler successfully crawls a page (which could be an image, a text do
   at any one time.
 * **Rate limiting**. Supercrawler will add a delay between requests to avoid
   bombarding servers.
-* **Exponential Backoff Retry**. Supercrawler will retry failed requests after 1 hour, then 2 hours, then 4 hours, etc. To use this feature, you must use the database-backed crawl queue.
+* **Exponential Backoff Retry**. Supercrawler will retry failed requests after 1 hour, then 2 hours, then 4 hours, etc. To use this feature, you must use the database-backed or Redis-backed crawl queue.
+* **Hostname Balancing**. Supercrawler will fairly split requests between
+different hostnames. To use this feature, you must use the Redis-backed crawl queue.
 
 ## How It Works
 
@@ -196,6 +198,42 @@ The following methods are available:
 | upsert(url) | Upsert `Url` object. |
 | getNextUrl() | Get the next `Url` to be crawled. |
 
+## RedisUrlList
+
+`RedisUrlList` is a queue backed with Redis.
+
+If a request fails, this queue will ensure the request gets retried at some point in the future. The next request is schedule 1 hour into the future. After that, the period of delay doubles for each failure.
+
+It also balances requests between different hostnames. So, for example, if you
+crawl a sitemap file with 10,000 URLs, the next 10,000 URLs will not be stuck in
+the same host.
+
+Options:
+
+| Option | Description |
+| --- | --- |
+| opts.redis | Options passed to [ioredis](https://github.com/luin/ioredis). |
+| opts.delayHalfLifeMs | Hostname delay factor half-life. Requests are delayed by an amount of time proportional to the number of pages crawled for a hostname, but this factor exponentially decays over time. Default = 3600000 (1 hour). |
+| opts.expiryTimeMs | Amount of time before recrawling a successful URL. Default = 2592000000 (30 days). |
+| opts.initialRetryTimeMs | Amount of time to wait before first retry after a failed URL. Default = 3600000 (1 hour) |
+
+Example usage:
+
+```js
+new supercrawler.DbUrlList({
+  redis: {
+    host: "127.0.0.1"
+  }
+})
+```
+
+The following methods are available:
+
+| Method | Description |
+| --- | --- |
+| insertIfNotExists(url) | Insert a `Url` object. |
+| upsert(url) | Upsert `Url` object. |
+| getNextUrl() | Get the next `Url` to be crawled. |
 
 ## FifoUrlList
 
@@ -308,6 +346,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 0.15.0
+
+* [Added] Redis based queue.
 
 ### 0.14.0
 
