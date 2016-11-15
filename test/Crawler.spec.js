@@ -399,6 +399,25 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("works with multiple User agent rows", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      robotsTxt = ["User-agent: *",
+        "User-agent: googlebot",
+        "Allow: /",
+        "Disallow: /index1.html"
+      ].join("\n");
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index1.html", false)).to.equal(0);
+        done();
+      }, 200);
+    });
+
     it("skips a page that is excluded by robots.txt", function (done) {
       var crawler = new Crawler({
         interval: 10

@@ -347,6 +347,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.15.1
+
+* [Fixed] Support for multiple "User-agent" lines in robots.txt files
+
 ### 0.15.0
 
 * [Added] Redis based queue.
