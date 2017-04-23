@@ -138,4 +138,59 @@ describe("sitemapsParser", function () {
       done();
     });
   });
+
+  it("allows a gzip 'type' to be specified as a string", function (done) {
+    var sp = new sitemapsParser({
+      gzipContentTypes: "arbitrary/gzip"
+    });
+
+    Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
+      return sp({
+        body: buf,
+        url: "http://example.com/sitemap_index.xml",
+        contentType: "arbitrary/gzip"
+      });
+    }).then(function (urls) {
+      expect(urls).to.deep.equal([
+        "https://example.com/home.html"
+      ]);
+      done();
+    });
+  });
+
+  it("allows a gzip 'type' to be specified as an array", function (done) {
+    var sp = new sitemapsParser({
+      gzipContentTypes: ["arbitrary/gzip", "esoteric/gzip"]
+    });
+
+    Promise.promisify(zlib.gzip)(new Buffer(urlset)).then(function (buf) {
+      return sp({
+        body: buf,
+        url: "http://example.com/sitemap_index.xml",
+        contentType: "esoteric/gzip"
+      });
+    }).then(function (urls) {
+      expect(urls).to.deep.equal([
+        "https://example.com/home.html"
+      ]);
+      done();
+    });
+  });
+
+  it("gzip can be turned off with empty gzipContentTypes array", function (done) {
+    var sp = new sitemapsParser({
+      gzipContentTypes: []
+    });
+
+    sp({
+      body: new Buffer(urlset),
+      url: "http://example.com/sitemap_index.xml",
+      contentType: "application/gzip"
+    }).then(function (urls) {
+      expect(urls).to.deep.equal([
+        "https://example.com/home.html"
+      ]);
+      done();
+    });
+  });
 });
