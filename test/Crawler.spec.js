@@ -447,6 +447,21 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("crawls all pages if robots.txt is 410", function (done) {
+      var crawler = new Crawler({
+        interval: 10
+      });
+
+      crawler.start();
+      robotsStatusCode = 410;
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index17.html", false)).to.equal(1);
+        done();
+      }, 200);
+    });
+
     it("excludes all pages if robots.txt could not be crawled", function (done) {
       var crawler = new Crawler({
         interval: 10
