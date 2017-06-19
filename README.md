@@ -347,6 +347,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 0.16.1
+
+* [Fixed] Treats 410 the same as 404 for robots.txt requests.
+
 ### 0.16.0
 
 * [Added] Support for `gzipContentTypes` option to `sitemapsParser`. Example: `gzipContentTypes: 'application/gzip'` and `gzipContentTypes: ['application/gzip']`.
