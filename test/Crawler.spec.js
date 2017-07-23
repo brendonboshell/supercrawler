@@ -550,18 +550,24 @@ describe("Crawler", function () {
 
   describe("#addHandler", function () {
     var handler,
-        handlerRet;
+        handlerRet,
+        handlerType;
 
     beforeEach(function () {
       handlerRet = [];
+      handlerType = 'resolve';
       handler = sinon.spy(function () {
-        return handlerRet;
+        if (handlerType === 'reject') {
+          return Promise.reject(handlerRet);
+        } else {
+          return handlerRet;
+        }
       });
     });
 
     it("can listen to all content types", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       crawler.addHandler(handler);
@@ -576,12 +582,12 @@ describe("Crawler", function () {
           contentType: "text/plain"
         }));
         done();
-      }, 15);
+      }, 200);
     });
 
     it("fires for matching content types", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       pageContentType = "text/html";
@@ -596,12 +602,12 @@ describe("Crawler", function () {
           contentType: "text/html"
         }));
         done();
-      }, 15);
+      }, 200);
     });
 
     it("does not fire for non-matching content types", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       pageContentType = "text/plain";
@@ -615,12 +621,12 @@ describe("Crawler", function () {
           url: "https://example.com/index1.html"
         }))).to.equal(false);
         done();
-      }, 15);
+      }, 200);
     });
 
     it("fires for a wide-matching content type", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       pageContentType = "text/plain";
@@ -634,12 +640,12 @@ describe("Crawler", function () {
           url: "https://example.com/index1.html"
         }))).to.equal(true);
         done();
-      }, 15);
+      }, 200);
     });
 
     it("can fire when content type determined from extension", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       pageContentType = "";
@@ -653,12 +659,12 @@ describe("Crawler", function () {
           url: "https://example.com/index1.html"
         }))).to.equal(true);
         done();
-      }, 15);
+      }, 200);
     });
 
     it("can hold fire when content type determined from extension", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       pageContentType = "";
@@ -672,12 +678,12 @@ describe("Crawler", function () {
           url: "https://example.com/index1.html"
         }))).to.equal(false);
         done();
-      }, 15);
+      }, 200);
     });
 
     it("passes the content type as the third argument", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       crawler.addHandler(handler);
@@ -692,12 +698,12 @@ describe("Crawler", function () {
           contentType: "text/plain"
         }));
         done();
-      }, 100);
+      }, 200);
     });
 
     it("adds URL to the queue", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       handlerRet = [
@@ -716,12 +722,12 @@ describe("Crawler", function () {
           _url: "https://example.com/page98.html"
         }));
         done();
-      }, 15);
+      }, 200);
     });
 
     it("uses the bulk insert method if it exists", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       handlerRet = [
@@ -740,12 +746,12 @@ describe("Crawler", function () {
           _url: "https://example.com/page99.html"
         })]));
         done();
-      }, 15);
+      }, 200);
     });
 
     it("works if handler returns invalid value", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
       handlerRet = true;
@@ -758,15 +764,16 @@ describe("Crawler", function () {
           _url: true
         }))).to.equal(false);
         done();
-      }, 15);
+      }, 200);
     });
 
     it("records a HANDLERS_ERROR if exception thrown", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
 
-      handlerRet = Promise.reject(new Error("Something went wrong"));
+      handlerType = 'reject';
+      handlerRet = new Error("Something went wrong");
       crawler.addHandler(handler);
       crawler.start();
 
@@ -777,17 +784,18 @@ describe("Crawler", function () {
           _errorCode: "HANDLERS_ERROR"
         }));
         done();
-      }, 15);
+      }, 200);
     });
 
     it("emits a handlersError event if exception thrown", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 100
       });
       var listenSpy = sinon.spy();
       var err = new Error("test");
 
-      handlerRet = Promise.reject(err);
+      handlerType = 'reject';
+      handlerRet = err;
       crawler.addHandler(handler);
       crawler.on("handlersError", listenSpy);
       crawler.start();
@@ -796,7 +804,7 @@ describe("Crawler", function () {
         crawler.stop();
         sinon.assert.calledWith(listenSpy, err);
         done();
-      }, 15);
+      }, 200);
     });
   });
 });
