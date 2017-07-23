@@ -546,6 +546,29 @@ describe("Crawler", function () {
         done();
       }, 100);
     });
+
+    it("accepts custom request options", function (done) {
+      var crawler = new Crawler({
+        interval: 50,
+        request: {
+          headers: {
+            'x-test-header': 'test'
+          }
+        }
+      });
+
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(requestSpy, sinon.match({
+          headers: {
+            'x-test-header': 'test'
+          }
+        }));
+        done();
+      }, 200);
+    });
   });
 
   describe("#addHandler", function () {
