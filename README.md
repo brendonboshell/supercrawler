@@ -222,7 +222,7 @@ Options:
 Example usage:
 
 ```js
-new supercrawler.DbUrlList({
+new supercrawler.RedisUrlList({
   redis: {
     host: "127.0.0.1"
   }
