@@ -44,7 +44,7 @@ describe("Crawler", function () {
 
       this.callCount++;
 
-      if (this.callCount >= listSize) {
+      if (this.callCount > listSize) {
         return Promise.reject(new RangeError("rangeerror"));
       }
 
@@ -235,6 +235,80 @@ describe("Crawler", function () {
       }, 100);
     });
 
+    it("emits urllistempty if list is intermittently empty", function (done) {
+      var urlList = new FifoUrlListMock(),
+          crawler = new Crawler({
+            urlList: urlList,
+            interval: 200,
+            concurrentRequestsLimit: 2
+          }),
+          listenSpy = sinon.spy();
+
+      listSize = 1;
+      urlList.upsert = function () {
+        return Promise.delay(250).then(function () {
+          urlList.callCount = 0;
+        });
+      };
+      crawler.on("urllistempty", listenSpy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.called(listenSpy);
+        done();
+      }, 300);
+    });
+
+    it("does not emit urllistcomplete if list is intermittently empty", function (done) {
+      var urlList = new FifoUrlListMock(),
+          crawler = new Crawler({
+            urlList: urlList,
+            interval: 200,
+            concurrentRequestsLimit: 2
+          }),
+          listenSpy = sinon.spy();
+
+      listSize = 1;
+      urlList.upsert = function () {
+        return Promise.delay(250).then(function () {
+          urlList.callCount = 0;
+        });
+      };
+      crawler.on("urllistcomplete", listenSpy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.notCalled(listenSpy);
+        done();
+      }, 300);
+    });
+
+    it("emits urllistcomplete if list is permanently empty", function (done) {
+      var urlList = new FifoUrlListMock(),
+          crawler = new Crawler({
+            urlList: urlList,
+            interval: 200,
+            concurrentRequestsLimit: 2
+          }),
+          listenSpy = sinon.spy();
+
+      listSize = 0;
+      urlList.upsert = function () {
+        return Promise.delay(250).then(function () {
+          urlList.callCount = 0;
+        });
+      };
+      crawler.on("urllistcomplete", listenSpy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.called(listenSpy);
+        done();
+      }, 300);
+    });
 
     it("throttles requests according to the interval", function (done) {
       var crawler = new Crawler({

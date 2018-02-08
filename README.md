@@ -159,7 +159,8 @@ The `Crawler` object fires the following events:
 | Event | Description |
 | --- | --- |
 | crawlurl(url) | Fires when crawling starts with a new URL. |
-| urllistempty | Fires when the URL list is empty. |
+| urllistempty | Fires when the URL list is (intermittently) empty. |
+| urllistcomplete | Fires when the URL list is permanently empty, barring URLs added by external sources. This only makes sense when running Supercrawler in non-distributed fashion. |
 
 ## DbUrlList
 
@@ -348,6 +349,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 1.2.0
+
+* [Added] Crawler fires the `urllistcomplete` event when the UrlList is permanently
+empty (compare with `urllistempty`, which may fire intermittently).
 
 ### 1.1.0
 
