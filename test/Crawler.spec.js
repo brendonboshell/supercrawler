@@ -455,6 +455,20 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("emits a crawled event", function (done) {
+      var crawler = new Crawler({ interval: 10 });
+      var spy = sinon.spy();
+
+      crawler.on("crawledurl", spy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(spy, "https://example.com/index1.html", null, 200);
+        done();
+      }, 200);
+    });
+
     it("skips page excluded by robots.txt, even if robots.txt not in cache", function (done) {
       var crawler = new Crawler({
         interval: 10
@@ -900,6 +914,25 @@ describe("Crawler", function () {
       setTimeout(function () {
         crawler.stop();
         sinon.assert.calledWith(listenSpy, err);
+        done();
+      }, 200);
+    });
+
+    it("emits arbitrary errors thrown by the UrlList", function (done) {
+      var crawler = new Crawler({
+        interval: 100
+      });
+      var spy = sinon.spy();
+
+      crawler.getUrlList().insertIfNotExistsBulk = sinon.spy(function () {
+        return Promise.reject(new Error('abitrary error'));
+      });
+      crawler.on("crawledurl", spy);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        sinon.assert.calledWith(spy, "https://example.com/index1.html", "OTHER_ERROR", null);
         done();
       }, 200);
     });

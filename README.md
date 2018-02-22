@@ -159,6 +159,7 @@ The `Crawler` object fires the following events:
 | Event | Description |
 | --- | --- |
 | crawlurl(url) | Fires when crawling starts with a new URL. |
+| crawledurl(url, errorCode, statusCode) | Fires when crawling of a URL is complete. `errorCode` is `null` if no error occurred. `statusCode` is set if and only if the request was successful. |
 | urllistempty | Fires when the URL list is (intermittently) empty. |
 | urllistcomplete | Fires when the URL list is permanently empty, barring URLs added by external sources. This only makes sense when running Supercrawler in non-distributed fashion. |
 
@@ -349,6 +350,11 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 1.3.0
+
+* [Added] Crawler fires the `crawledurl` event the crawl of a specific URL is
+complete (whether successful or not).
 
 ### 1.2.0
 
