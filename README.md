@@ -351,6 +351,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 1.3.1
+
+* [Fix] `htmlLinkParser` should detect links matching the `area[href]` selector.
+
 ### 1.3.0
 
 * [Added] Crawler fires the `crawledurl` event the crawl of a specific URL is
