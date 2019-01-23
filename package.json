@@ -32,7 +32,7 @@
   "dependencies": {
     "bluebird": "^3.5.3",
     "cheerio": "^0.22.0",
-    "ioredis": "^3.1.1",
+    "ioredis": "^3.2.2",
     "lodash": "^4.17.11",
     "mime-types": "^2.1.21",
     "node-cache": "^4.2.0",
