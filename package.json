@@ -30,14 +30,14 @@
     "sinon": "^1.17.7"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.3",
     "cheerio": "^0.22.0",
     "ioredis": "^3.1.1",
-    "lodash": "^4.17.4",
-    "mime-types": "^2.1.15",
+    "lodash": "^4.17.11",
+    "mime-types": "^2.1.21",
     "node-cache": "^4.2.0",
     "request": "^2.88.0",
-    "robots-parser": "^1.0.1",
+    "robots-parser": "^2.1.1",
     "sequelize": "^4.4.2",
     "sqlite3": "^3.1.8"
   }
