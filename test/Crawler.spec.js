@@ -552,7 +552,8 @@ describe("Crawler", function () {
 
     it("crawls all pages if robots.txt is 500", function (done) {
       var crawler = new Crawler({
-        interval: 10
+        interval: 10,
+        robotsIgnoreServerError: true
       });
 
       crawler.start();
