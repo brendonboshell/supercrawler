@@ -129,6 +129,7 @@ crawler with the following options:
 | interval | Number of milliseconds between requests. Defaults to 1000. |
 | concurrentRequestsLimit | Maximum number of concurrent requests. Defaults to 5. |
 | robotsCacheTime | Number of milliseconds that robots.txt should be cached for. Defaults to 3600000 (1 hour). |
+| robotsIgnoreServerError | Indicates if `500` status code response for robots.txt should be ignored. Defaults to `false`. |
 | userAgent | User agent to use for requests. Defaults to `Mozilla/5.0 (compatible; supercrawler/1.0; +https://github.com/brendonboshell/supercrawler)` |
 | request | Object of options to be passed to [request](https://github.com/request/request). Note that request does not support an asynchronous (and distributed) cookie jar. |
 
@@ -350,6 +351,14 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 1.4.0
+
+* [Added] Added the `robotsIgnoreServerError` option to accept a robots.txt 500 error code as "allow all" rather than "deny all" (default), thanks [cbess](https://github.com/cbess).
+
+### 1.3.3
+
+* [Fix] Updated dependencies, thanks [cbess](https://github.com/cbess).
 
 ### 1.3.1
 
