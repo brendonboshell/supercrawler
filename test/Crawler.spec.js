@@ -596,6 +596,22 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("includes all pages if robots.txt disabled", function (done) {
+      var crawler = new Crawler({
+        interval: 10,
+        robotsEnabled: false
+      });
+
+      crawler.start();
+      robotsStatusCode = 600;
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(numCrawlsOfUrl("https://example.com/index5.html", false)).to.equal(1);
+        done();
+      }, 200);
+    });
+
     it("updates the error code to ROBOTS_NOT_ALLOWED", function (done) {
       var crawler = new Crawler({
         interval: 10
