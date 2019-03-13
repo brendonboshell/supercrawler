@@ -175,6 +175,7 @@ Options:
 
 | Option | Description |
 | --- | --- |
+| opts.reset | true to clean up all existing data before start. |
 | opts.db.database | Database name. |
 | opts.db.username | Database username. |
 | opts.db.password | Database password. |
