@@ -801,6 +801,44 @@ describe("Crawler", function () {
       }, 200);
     });
 
+    it("fires for a array content type", function (done) {
+      var crawler = new Crawler({
+        interval: 100
+      });
+
+      pageContentType = "text/html";
+      crawler.addHandler(["text/plain", "text/html"], handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html"
+        }))).to.equal(true);
+        done();
+      }, 200);
+    });
+
+    it("can hold fire for a array content type", function (done) {
+      var crawler = new Crawler({
+        interval: 100
+      });
+
+      pageContentType = "text/xml";
+      crawler.addHandler(["text/plain", "text/html"], handler);
+      crawler.start();
+
+      setTimeout(function () {
+        crawler.stop();
+        expect(handler.calledWith(sinon.match({
+          body: sinon.match(new Buffer("<html><body>test</body></html>")),
+          url: "https://example.com/index1.html"
+        }))).to.equal(false);
+        done();
+      }, 200);
+    });
+
     it("can fire when content type determined from extension", function (done) {
       var crawler = new Crawler({
         interval: 100

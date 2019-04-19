@@ -99,6 +99,9 @@ crawler.addHandler("text/html", supercrawler.handlers.htmlLinkParser({
   hostnames: ["example.com"]
 }));
 
+// Match an array of content-type
+crawler.addHandler(["text/plain", "text/html"], myCustomHandler);
+
 // Custom content handler for HTML pages.
 crawler.addHandler("text/html", function (context) {
   var sizeKb = Buffer.byteLength(context.body) / 1024;
@@ -154,7 +157,7 @@ The following methods are available:
 | start | Start crawling. |
 | stop | Stop crawling. |
 | addHandler(handler) | Add a handler for all content types. |
-| addHandler(contentType, handler) | Add a handler for a specific content type. |
+| addHandler(contentType, handler) | Add a handler for a specific content type. If `contentType` is a string, then (for example) 'text' will match 'text/html', 'text/plain', etc. If `contentType` is an array of strings, the page content type must match exactly. |
 
 The `Crawler` object fires the following events:
 
@@ -363,6 +366,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 1.7.0
+
+* [Changed] `Crawler#addHandler` can now take an array of content-type to match, thanks [taina0407](https://github.com/taina0407).
 
 ### 1.6.0
 
