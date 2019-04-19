@@ -179,6 +179,8 @@ Options:
 | opts.db.username | Database username. |
 | opts.db.password | Database password. |
 | opts.db.sequelizeOpts | Options to pass to sequelize. |
+| opts.db.table | Table name to store URL queue. Default = 'url' |
+| opts.recrawlInMs | Number of milliseconds to recrawl a URL. Default = 31536000000 (1 year) |
 
 Example usage:
 
@@ -300,12 +302,21 @@ links.
 | Option | Description |
 | --- | --- |
 | hostnames | Array of hostnames that are allowed to be crawled. |
+| urlFilter(url, pageUrl) | Function that takes a URL and returns `true` if it should be included. |
 
 Example usage:
 
 ```js
 var hlp = supercrawler.handlers.htmlLinkParser({
   hostnames: ["example.com"]
+});
+```
+
+```js
+var hlp = supercrawler.handlers.htmlLinkParser({
+  urlFilter: function (url) {
+    return url.indexOf("page1") === -1;
+  }
 });
 ```
 
@@ -352,6 +363,12 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ```
 
 ## Changelog
+
+### 1.6.0
+
+* [Added] Added `opts.db.table` option to `DbUrlList` ([adversinc](https://github.com/adversinc)).
+* [Added] Added `recrawlInMs` option to `DbUrlList` ([adversinc](https://github.com/adversinc)).
+* [Added] Added the `urlFilter` option to `htmlLinkParser` ([adversinc](https://github.com/adversinc)).
 
 ### 1.5.0
 

@@ -139,4 +139,25 @@ describe("HtmlLikParser", function () {
       url: "http://example.com"
     })).to.deep.equal([]);
   });
+
+  it ("can apply a filter to the URLs discovered", function () {
+    var hlp = htmlLinkParser({
+          urlFilter: function (url) {
+            return url.indexOf("page1") === -1;
+          }
+        }),
+        html;
+
+    html = makeHtmlWithLinks([
+      "page1.html",
+      "page2.html"
+    ]);
+
+    expect(hlp({
+      body: html,
+      url: "http://example.com"
+    })).to.deep.equal([
+      "http://example.com/page2.html"
+    ]);
+  });
 });
