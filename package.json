@@ -19,26 +19,26 @@
   ],
   "scripts": {
     "test": "mocha --recursive",
-    "coverage": "istanbul cover _mocha -- -R spec --recursive"
+    "coverage": "nyc --check-coverage npm test"
   },
   "main": "./lib/index.js",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^2.5.3",
-    "proxyquire": "^1.8.0",
-    "sinon": "^1.17.7"
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.0",
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.3.2"
   },
   "dependencies": {
-    "bluebird": "^3.5.3",
-    "cheerio": "^0.22.0",
-    "ioredis": "^3.2.2",
+    "bluebird": "^3.5.4",
+    "cheerio": "^1.0.0-rc.3",
+    "ioredis": "^4.9.3",
     "lodash": "^4.17.11",
-    "mime-types": "^2.1.21",
+    "mime-types": "^2.1.24",
     "node-cache": "^4.2.0",
     "request": "^2.88.0",
     "robots-parser": "^2.1.1",
-    "sequelize": "^4.42.0",
-    "sqlite3": "^4.0.6"
+    "sequelize": "^5.8.5",
+    "sqlite3": "^4.0.7"
   }
 }
