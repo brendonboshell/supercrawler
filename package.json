@@ -1,7 +1,7 @@
 {
   "name": "supercrawler",
   "description": "A web crawler. Supercrawler automatically crawls websites. Define custom handlers to parse content. Obeys robots.txt, rate limits and concurrency limits.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "homepage": "https://github.com/brendonboshell/supercrawler",
   "author": "Brendon Boshell <brendonboshell@gmail.com>",
   "license": "Apache-2.0",
