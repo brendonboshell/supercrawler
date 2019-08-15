@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "test": "mocha --recursive",
-    "coverage": "nyc --check-coverage npm test"
+    "coverage": "nyc --reporter=lcov --check-coverage npm test"
   },
   "main": "./lib/index.js",
   "devDependencies": {
@@ -27,7 +27,7 @@
     "mocha": "^6.1.4",
     "nyc": "^14.1.0",
     "proxyquire": "^2.1.0",
-    "sinon": "^7.3.2"
+    "sinon": "^1.17.7"
   },
   "dependencies": {
     "bluebird": "^3.5.4",
