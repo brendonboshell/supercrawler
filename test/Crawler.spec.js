@@ -452,7 +452,7 @@ describe("Crawler", function () {
         crawler.stop();
         sinon.assert.calledWith(spy, "https://example.com/index18.html");
         done();
-      }, 200);
+      }, 500);
     });
 
     it("emits a crawled event", function (done) {
