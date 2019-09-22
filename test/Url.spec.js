@@ -18,6 +18,10 @@ describe("Url", function () {
     expect(new Url("https://example.com/").getUniqueId()).to.equal("https://example.com/");
   });
 
+  it("adds trailing slash for normalization if the URL of the root page is given (e.g. https://example.com -> https://example.com/)", function () {
+    expect(new Url("https://example.com").getUniqueId()).to.equal("https://example.com/");
+  });
+
   describe("#getStatusCode", function () {
     it("returns the statusCode if specified", function () {
       expect(new Url({
@@ -37,6 +41,12 @@ describe("Url", function () {
     it("returns the URL", function () {
       expect(new Url({
         url: "https://example.com/"
+      }).getUrl()).to.equal("https://example.com/");
+    });
+
+    it("adds trailing slash for normalization if the URL of the root page is given (e.g. https://example.com -> https://example.com/)", function () {
+      expect(new Url({
+        url: "https://example.com"
       }).getUrl()).to.equal("https://example.com/");
     });
   });

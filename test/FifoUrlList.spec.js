@@ -1,4 +1,5 @@
 var FifoUrlList = require("../lib/FifoUrlList"),
+    Url = require("../lib/Url"),
     expect = require("chai").expect,
     makeUrl = require("./utils/makeUrl");
 
@@ -82,6 +83,26 @@ describe("FifoUrlList", function () {
       expect(res.getStatusCode()).to.equal(null);
       done();
     });
+  });
+
+  it("recognizes https://example.com (no slash) and https://example.com/ (with slash) as the same URL", async function () {
+    var fifoUrlList = new FifoUrlList(),
+        url1 = new Url("https://example.com"),
+        url2 = new Url("https://example.com/");
+
+    await fifoUrlList.insertIfNotExists(url1);
+    await fifoUrlList.insertIfNotExists(url2);
+
+    var res1 = await fifoUrlList.getNextUrl();
+    expect(res1.getUrl()).to.equal("https://example.com/");
+    expect(res1.getUniqueId()).to.equal("https://example.com/");
+
+    try {
+      await fifoUrlList.getNextUrl();
+    } catch (err) {
+      expect(err).to.be.an.instanceof(RangeError);
+      expect(err.message).to.equal("The list has been exhausted.");
+    }
   });
 
   describe("upsert", function () {
