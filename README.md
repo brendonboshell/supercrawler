@@ -367,6 +367,10 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
+### 1.7.2
+
+* [Fixed] Update DbUrlList to use symbol operators, thanks [hjr3](https://github.com/hjr3).
+
 ### 1.7.1
 
 * [Changed] Updated dependencies, thanks [MrRefactoring](https://github.com/MrRefactoring/supercrawler).
