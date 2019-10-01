@@ -164,7 +164,7 @@ The `Crawler` object fires the following events:
 | Event | Description |
 | --- | --- |
 | crawlurl(url) | Fires when crawling starts with a new URL. |
-| crawledurl(url, errorCode, statusCode) | Fires when crawling of a URL is complete. `errorCode` is `null` if no error occurred. `statusCode` is set if and only if the request was successful. |
+| crawledurl(url, errorCode, statusCode, errorMessage) | Fires when crawling of a URL is complete. `errorCode` is `null` if no error occurred. `statusCode` is set if and only if the request was successful. `errorMessage` is `null` if no error occurred. |
 | urllistempty | Fires when the URL list is (intermittently) empty. |
 | urllistcomplete | Fires when the URL list is permanently empty, barring URLs added by external sources. This only makes sense when running Supercrawler in non-distributed fashion. |
 

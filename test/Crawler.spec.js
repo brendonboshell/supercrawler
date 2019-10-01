@@ -1017,7 +1017,7 @@ describe("Crawler", function () {
 
       setTimeout(function () {
         crawler.stop();
-        sinon.assert.calledWith(spy, "https://example.com/index1.html", "OTHER_ERROR", null);
+        sinon.assert.calledWith(spy, "https://example.com/index1.html", "OTHER_ERROR", null, "abitrary error");
         done();
       }, 200);
     });
