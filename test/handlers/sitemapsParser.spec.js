@@ -19,6 +19,10 @@ describe("sitemapsParser", function () {
       "<loc>http://example.com/sitemap.xml.gz</loc>",
       "<lastmod>2015-07-17T18:16:02.754-07:00</lastmod>",
       "</sitemap>",
+      "<sitemap>",
+      "<loc>http://example.com/sitemap-de.xml.gz</loc>",
+      "<lastmod>2015-07-17T18:16:02.754-07:00</lastmod>",
+      "</sitemap>",
       "</sitemapindex>"
     ].join("\n");
 
@@ -49,7 +53,8 @@ describe("sitemapsParser", function () {
       url: "http://example.com/sitemap_index.xml"
     }).then(function (urls) {
       expect(urls).to.deep.equal([
-        "http://example.com/sitemap.xml.gz"
+        "http://example.com/sitemap.xml.gz",
+        "http://example.com/sitemap-de.xml.gz"
       ]);
       done();
     });
@@ -104,6 +109,24 @@ describe("sitemapsParser", function () {
     }).then(function (urls) {
       expect(urls).to.deep.equal([
         "https://example.com/home.html"
+      ]);
+      done();
+    });
+  });
+
+  it("can apply a filter to sitemap URLs discovered within sitemap", function (done) {
+    var sp = new sitemapsParser({
+      urlFilter: function (url) {
+        return url.indexOf("de") === -1;
+      }
+    });
+
+    sp({
+      body: new Buffer(sitemapindex ),
+      url: "http://example.com/sitemap_index.xml"
+    }).then(function (urls) {
+      expect(urls).to.deep.equal([
+        "http://example.com/sitemap.xml.gz"
       ]);
       done();
     });
