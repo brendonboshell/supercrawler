@@ -198,6 +198,22 @@ describe("Crawler", function () {
         userAgent: "mybot/1.1"
       }).getUserAgent()).to.equal("mybot/1.1");
     });
+
+    it("will accept a function as a user agent", function () {
+      expect(new Crawler({
+        userAgent: () => "mybot/1.1"
+      }).getUserAgent()).to.equal("mybot/1.1");
+
+      expect(new Crawler({
+        userAgent: (url) => {
+          if (url === 'http://www.example.com/some/random/page') {
+            return 'url specific user agent';
+          }
+
+          return "mybot/1.1";
+        }
+      }).getUserAgent()).to.equal("mybot/1.1");
+    });
   });
 
   describe("#start", function () {
