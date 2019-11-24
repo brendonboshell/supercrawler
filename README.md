@@ -367,7 +367,7 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 ## Changelog
 
-### next
+### 2.0.0
 
 * [Added] `crawledurl` event to contain the error message, thanks [hjr3](https://github.com/hjr3).
 * [Changed] `sitemapsParser` to apply `urlFilter` on the sitemaps entries, thanks [hjr3](https://github.com/hjr3).
