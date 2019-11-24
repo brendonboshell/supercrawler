@@ -134,7 +134,7 @@ crawler with the following options:
 | robotsEnabled | Indicates if the robots.txt is downloaded and checked. Defaults to `true`. |
 | robotsCacheTime | Number of milliseconds that robots.txt should be cached for. Defaults to 3600000 (1 hour). |
 | robotsIgnoreServerError | Indicates if `500` status code response for robots.txt should be ignored. Defaults to `false`. |
-| userAgent | User agent to use for requests. Defaults to `Mozilla/5.0 (compatible; supercrawler/1.0; +https://github.com/brendonboshell/supercrawler)` |
+| userAgent | User agent to use for requests. This can be either a string or a function that takes the URL being crawled. Defaults to `Mozilla/5.0 (compatible; supercrawler/1.0; +https://github.com/brendonboshell/supercrawler)`. |
 | request | Object of options to be passed to [request](https://github.com/request/request). Note that request does not support an asynchronous (and distributed) cookie jar. |
 
 Example usage:
@@ -371,6 +371,7 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 
 * [Added] `crawledurl` event to contain the error message, thanks [hjr3](https://github.com/hjr3).
 * [Changed] `sitemapsParser` to apply `urlFilter` on the sitemaps entries, thanks [hjr3](https://github.com/hjr3).
+* [Added] `Crawler` to take `userAgent` option as a function, thanks [hjr3](https://github.com/hjr3).
 
 ### 1.7.2
 
