@@ -356,7 +356,7 @@ specification.
 
 | Option | Description |
 | --- | --- |
-| urlFilter | Function that takes a URL and returns `true` if it should be included. |
+| urlFilter | Function that takes a URL (including sitemap entries) and returns `true` if it should be included. |
 
 Example usage:
 
@@ -370,6 +370,7 @@ crawler.addHandler(supercrawler.handlers.sitemapsParser());
 ### next
 
 * [Added] `crawledurl` event to contain the error message, thanks [hjr3](https://github.com/hjr3).
+* [Changed] `sitemapsParser` to apply `urlFilter` on the sitemaps entries, thanks [hjr3](https://github.com/hjr3).
 
 ### 1.7.2
 
