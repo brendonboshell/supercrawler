@@ -136,6 +136,7 @@ crawler with the following options:
 | robotsIgnoreServerError | Indicates if `500` status code response for robots.txt should be ignored. Defaults to `false`. |
 | userAgent | User agent to use for requests. This can be either a string or a function that takes the URL being crawled. Defaults to `Mozilla/5.0 (compatible; supercrawler/1.0; +https://github.com/brendonboshell/supercrawler)`. |
 | request | Object of options to be passed to [request](https://github.com/request/request). Note that request does not support an asynchronous (and distributed) cookie jar. |
+| maxContentLength | The maximum content length (bytes) for requests. This can be either a number or a function that takes the URL being downloaded. Defaults to `0` (no max). |
 
 Example usage:
 
@@ -154,6 +155,7 @@ The following methods are available:
 | getInterval | Get the interval setting. |
 | getConcurrentRequestsLimit | Get the maximum number of concurrent requests. |
 | getUserAgent | Get the user agent. |
+| getMaxContentLength | Get the maximum content length for the request. |
 | start | Start crawling. |
 | stop | Stop crawling. |
 | addHandler(handler) | Add a handler for all content types. |
