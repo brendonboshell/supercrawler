@@ -39,6 +39,6 @@
     "request": "^2.88.0",
     "robots-parser": "^2.1.1",
     "sequelize": "^5.8.5",
-    "sqlite3": "5.0.2"
+    "sqlite3": "^5.0.2"
   }
 }
